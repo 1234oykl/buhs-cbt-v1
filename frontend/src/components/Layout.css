@@ -1,0 +1,43 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* ❌ removes scrolling */
+  font-family: Arial;
+}
+
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.app-header {
+  height: 70px;
+  background: #111;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* clickable logo */
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
+}
+
+.logo {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+/* PAGE AREA */
+.app-body {
+  flex: 1;
+  overflow: hidden;
+}

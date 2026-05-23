@@ -1,0 +1,68 @@
+.leaderboard-page {
+  padding: 30px;
+  font-family: Arial, sans-serif;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  text-decoration: none;
+  background: #0d6efd;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.back-btn:hover {
+  background: #084298;
+}
+
+.loading {
+  font-size: 18px;
+  color: #333;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.empty {
+  font-size: 16px;
+  color: gray;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.leaderboard-table th {
+  background: #111827;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.leaderboard-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.leaderboard-table tr:hover {
+  background: #f2f2f2;
+}
+
+.rank {
+  font-size: 20px;
+  font-weight: bold;
+}

@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+}
+
+
+.home {
+  height: 100vh;
+  background: url("../assets/cbt-bg1.png") center/cover no-repeat;
+  padding-top: 48px;
+  position: relative;
+}
+
+.top-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+
+  background: rgba(13, 110, 253, 0.55); /* stronger than before */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* scrolling container */
+.ticker {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* moving text */
+.ticker-track {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll-premium 22s linear infinite;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  color: #ffffff; /* force visible white */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); /* improves readability */
+
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* smooth scroll */
+@keyframes scroll-premium {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* hover pause */
+.top-banner:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+/* fade edges (premium touch) */
+.fade-left,
+.fade-right {
+  position: absolute;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.fade-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(13,110,253,0.7), transparent);
+}
+
+.fade-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(13,110,253,0.7), transparent);
+}
+
+.overlay {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.card {
+  max-width: 700px;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.card h1 {
+  margin-bottom: 10px;
+  font-size: 30px;
+}
+
+.card p {
+  font-size: 30px;
+  margin-bottom: 30px;
+}
+
+.cta-btn {
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  margin: 40px 5px 0 5px;
+
+
+  color: white;
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.35);
+
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* hover effect */
+.cta-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(13, 110, 253, 0.5);
+}
+
+/* click effect */
+.cta-btn:active {
+  transform: scale(0.97);
+}
+
+/* glowing animation */
+.cta-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: skewX(-25deg);
+}
+
+.cta-btn:hover::after {
+  animation: shine 0.7s forwards;
+}
+
+@keyframes shine {
+  100% {
+    left: 120%;
+  }
+}
+
+/* .card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+} */
