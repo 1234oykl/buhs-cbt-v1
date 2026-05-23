@@ -11,7 +11,7 @@ import ExamPage from "./pages/ExamPage";
 import Leaderboard from "./pages/Leaderboard";
 import CreateExam from "./pages/CreateExam";
 import AdminLogin from "./pages/AdminLogin";
-import AdminAddExam from "./pages/AdminAddExam";
+import AdminExamPage from "./pages/AdminExamPage";
 import ExamSubmitted from "./pages/ExamSubmitted";
 
 function App() {
@@ -68,7 +68,7 @@ function App() {
   path="/admin-add-exam"
   element={
     <ProtectedRoute role="admin">
-      <AdminAddExam />
+      <AdminExamPage />
     </ProtectedRoute>
   }
 />

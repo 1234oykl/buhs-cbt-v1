@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./AdminAddExam.css";
+import "./AdminExamPage.css";
 
 function AdminAddExam() {
   const navigate = useNavigate();
