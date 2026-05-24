@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./ExamPage.css";
@@ -19,6 +19,62 @@ function ExamPage() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const token = user?.token;
+
+  // =============================
+  // SUBMIT EXAM
+  // =============================
+  const submitExam = useCallback(
+    async (force = false) => {
+      if (submitted) return;
+
+      if (!force) {
+        const confirmSubmit = window.confirm(
+          "Are you sure you want to submit?"
+        );
+
+        if (!confirmSubmit) return;
+      }
+
+      setSubmitted(true);
+
+      try {
+        await axios.post(
+          "https://buhs-cbt-v1.onrender.com/api/results/submit",
+          {
+            student: user._id,
+            exam: id,
+            answers,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        // CLEAR SAVED DATA
+        localStorage.removeItem(`exam_${id}_answers`);
+        localStorage.removeItem(`exam_time_${id}`);
+
+        alert("Exam submitted successfully!");
+
+        navigate("/student-dashboard");
+      } catch (err) {
+        console.log(
+          "Submit error:",
+          err.response?.data || err.message
+        );
+
+        alert(
+          err.response?.data?.message ||
+            "Error submitting exam."
+        );
+
+        setSubmitted(false);
+      }
+    },
+    [answers, id, navigate, submitted, token, user]
+  );
 
   // =============================
   // SAVE ANSWERS
@@ -63,7 +119,7 @@ function ExamPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [exam, submitted, timeLeft, id]);
+  }, [exam, submitted, timeLeft, id, submitExam]);
 
   // =============================
   // RESTORE TIMER
@@ -77,7 +133,7 @@ function ExamPage() {
   }, [id]);
 
   // =============================
-  // LOAD EXAM + RANDOMIZED QUESTIONS
+  // LOAD EXAM
   // =============================
   useEffect(() => {
     const fetchExam = async () => {
@@ -85,7 +141,7 @@ function ExamPage() {
         setLoading(true);
 
         const res = await axios.post(
-          "http://localhost:5000/api/exams/start",
+          "https://buhs-cbt-v1.onrender.com/api/exams/start",
           { examId: id },
           {
             headers: {
@@ -96,10 +152,8 @@ function ExamPage() {
 
         setExam(res.data.exam);
 
-        // ✅ RANDOMIZED QUESTIONS
         setQuestions(res.data.shuffledQuestions || []);
 
-        // ✅ RESTORE TIMER
         const savedTime = localStorage.getItem(`exam_time_${id}`);
 
         setTimeLeft(
@@ -143,13 +197,11 @@ function ExamPage() {
     };
 
     window.addEventListener("blur", handleBlur);
-    window.addEventListener("beforeunload", handleBlur);
 
     return () => {
       window.removeEventListener("blur", handleBlur);
-      window.removeEventListener("beforeunload", handleBlur);
     };
-  }, [submitted]);
+  }, [submitted, submitExam]);
 
   // =============================
   // BLOCK COPY / PASTE
@@ -176,59 +228,6 @@ function ExamPage() {
       ...prev,
       [current]: value,
     }));
-  };
-
-  // =============================
-  // SUBMIT EXAM
-  // =============================
-  const submitExam = async (force = false) => {
-    if (submitted) return;
-
-    if (!force) {
-      const confirmSubmit = window.confirm(
-        "Are you sure you want to submit?"
-      );
-
-      if (!confirmSubmit) return;
-    }
-
-    setSubmitted(true);
-
-    try {
-      await axios.post(
-        "http://localhost:5000/api/results/submit",
-        {
-          student: user._id,
-          exam: id,
-          answers,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // CLEAR SAVED DATA
-      localStorage.removeItem(`exam_${id}_answers`);
-      localStorage.removeItem(`exam_time_${id}`);
-
-      alert("Exam submitted successfully!");
-
-      navigate("/studentdashboard");
-    } catch (err) {
-      console.log(
-        "Submit error:",
-        err.response?.data || err.message
-      );
-
-      alert(
-        err.response?.data?.message ||
-          "Error submitting exam."
-      );
-
-      setSubmitted(false);
-    }
   };
 
   // =============================
@@ -265,6 +264,8 @@ function ExamPage() {
         <h3 className="timer">
           ⏳ Time Left: {formatTime(timeLeft)}
         </h3>
+
+        <p>Tab Switches: {tabSwitches}</p>
       </div>
 
       <div className="cbt-body">
@@ -342,9 +343,7 @@ function ExamPage() {
         </button>
 
         <button
-          disabled={
-            current === questions.length - 1
-          }
+          disabled={current === questions.length - 1}
           onClick={() => setCurrent(current + 1)}
         >
           Next ➡
