@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./AdminExamPage.css";
 
-function AdminAddExam() {
+function AdminExamPage() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -313,4 +313,4 @@ function AdminAddExam() {
   );
 }
 
-export default AdminAddExam;
+export default AdminExamPage;
