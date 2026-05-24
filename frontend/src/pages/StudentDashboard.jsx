@@ -25,7 +25,7 @@ function StudentDashboard() {
     navigate("/login");
   };
 
-  // Fetch student + exams + results
+  // Fetch dashboard data
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -33,7 +33,7 @@ function StudentDashboard() {
 
         const user = JSON.parse(localStorage.getItem("user"));
 
-        if (!user || !user.token) {
+        if (!user?.token) {
           navigate("/login");
           return;
         }
@@ -46,20 +46,19 @@ function StudentDashboard() {
           },
         };
 
-        // ✅ Get class exams only
+        // ✅ FIX: get ALL exams, backend should filter by class
         const examsRes = await axios.get(
-          `http://localhost:5000/api/exams/class/${user.className}`,
-          config,
+          "http://localhost:5000/api/exams",
+          config
         );
 
-        // ✅ Get student results
         const resultsRes = await axios.get(
           `http://localhost:5000/api/results/student/${user._id}`,
-          config,
+          config
         );
 
-        setExams(examsRes.data);
-        setResults(resultsRes.data);
+        setExams(examsRes.data || []);
+        setResults(resultsRes.data || []);
 
         setLoading(false);
       } catch (err) {
@@ -71,35 +70,47 @@ function StudentDashboard() {
 
     fetchDashboard();
   }, [navigate]);
-  
 
-  // Filter exams by search
+  // Filter exams (search + class match)
   const filteredExams = exams.filter((e) => {
-    return (
+    const searchMatch =
       (e.title || "").toLowerCase().includes(search.toLowerCase()) ||
-      (e.subject || "").toLowerCase().includes(search.toLowerCase())
-    );
+      (e.subject || "").toLowerCase().includes(search.toLowerCase());
+
+    const classMatch =
+      student?.className &&
+      e.className &&
+      student.className
+        .toUpperCase()
+        .startsWith(e.className.toUpperCase());
+
+    return searchMatch && classMatch;
   });
 
   // Check if exam is completed
   const isExamCompleted = (examId) => {
-    return results.some((r) => r.exam?._id === examId || r.exam === examId);
+    return results.some(
+      (r) => r.exam?._id === examId || r.exam === examId
+    );
   };
 
-  // Start exam modal open
+  // Open modal
   const openInstructions = (exam) => {
     setSelectedExam(exam);
     setShowModal(true);
   };
 
-  // Confirm exam start
+  // Start exam
   const startExam = () => {
     if (!selectedExam) return;
+
+    setShowModal(false);
     navigate(`/exam/${selectedExam._id}`);
   };
 
   return (
     <div className="student-dashboard">
+
       {/* HEADER */}
       <div className="dashboard-header">
         <h1>Student Dashboard</h1>
@@ -108,15 +119,11 @@ function StudentDashboard() {
         </p>
       </div>
 
-      {/* STUDENT INFO CARD */}
+      {/* STUDENT INFO */}
       <div className="student-info-card">
         <div>
-          <p>
-            <b>Class:</b> {student?.className}
-          </p>
-          <p>
-            <b>Admission No:</b> {student?.admissionNo}
-          </p>
+          <p><b>Class:</b> {student?.className}</p>
+          <p><b>Admission No:</b> {student?.admissionNo}</p>
         </div>
 
         <button className="logout-btn" onClick={handleLogout}>
@@ -128,7 +135,7 @@ function StudentDashboard() {
       <div className="search-box">
         <input
           type="text"
-          placeholder="Search exam by title or subject..."
+          placeholder="Search exam..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -151,34 +158,38 @@ function StudentDashboard() {
             const completed = isExamCompleted(exam._id);
 
             return (
-              <div className="exam-card" key={exam._id || exam.id}>
+              <div className="exam-card" key={exam._id}>
+
                 <h3>{exam.title}</h3>
 
                 <div className="exam-meta">
                   <span className="badge subject">
                     {exam.subject || "No Subject"}
                   </span>
-                  <span className="badge duration">{exam.duration} mins</span>
+                  <span className="badge duration">
+                    {exam.duration} mins
+                  </span>
                   <span className="badge questions">
                     {exam.questions?.length || 0} Questions
                   </span>
                 </div>
 
                 <p className="exam-date">
-                  📅 Date:{" "}
-                  {exam.date
+                  📅 {exam.date
                     ? new Date(exam.date).toLocaleDateString()
-                    : "Not set"}
+                    : "No date"}
                 </p>
 
-                {completed && <p className="completed-badge">✅ Completed</p>}
+                {completed && (
+                  <p className="completed-badge">✅ Completed</p>
+                )}
 
                 <button
                   className="start-btn"
                   disabled={completed}
                   onClick={() => openInstructions(exam)}
                 >
-                  {completed ? "Exam Completed" : "Start Exam"}
+                  {completed ? "Completed" : "Start Exam"}
                 </button>
               </div>
             );
@@ -190,44 +201,41 @@ function StudentDashboard() {
       {showModal && selectedExam && (
         <div className="modal-overlay">
           <div className="modal-box">
+
             <h2>📌 Exam Instructions</h2>
 
+            <p><b>Exam:</b> {selectedExam.title}</p>
+            <p><b>Subject:</b> {selectedExam.subject}</p>
+            <p><b>Duration:</b> {selectedExam.duration} mins</p>
             <p>
-              <b>Exam:</b> {selectedExam.title}
-            </p>
-            <p>
-              <b>Subject:</b> {selectedExam.subject}
-            </p>
-            <p>
-              <b>Duration:</b> {selectedExam.duration} minutes
-            </p>
-            <p>
-              <b>Total Questions:</b> {selectedExam.questions?.length}
+              <b>Total Questions:</b>{" "}
+              {selectedExam.questions?.length || 0}
             </p>
 
             <hr />
 
             <ul>
               <li>Do not refresh the page.</li>
-              <li>Do not switch tabs (auto submit).</li>
-              <li>Ensure you have stable internet connection.</li>
-              <li>Once submitted, you cannot retake the exam.</li>
+              <li>Do not switch tabs.</li>
+              <li>Ensure stable internet connection.</li>
+              <li>No retake after submission.</li>
             </ul>
+
             <button className="confirm-btn" onClick={startExam}>
               Start Now
             </button>
 
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
+            <button
+              className="cancel-btn"
+              onClick={() => setShowModal(false)}
+            >
+              Cancel
+            </button>
+
           </div>
         </div>
       )}
+
     </div>
   );
 }

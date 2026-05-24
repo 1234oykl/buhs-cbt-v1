@@ -12,9 +12,13 @@ function Footer() {
           className="footer-logo"
         />
 
+        <div>
+          <span style={{color: 'yellow'}}>|</span>
+        </div>
+
         <div className="footer-text-container">
           <p className="footer-text">
-            Developed by Akod
+            Developed by AkodTech
           </p>
 
           <p className="footer-copy">
