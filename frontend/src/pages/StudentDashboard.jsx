@@ -219,7 +219,7 @@ function StudentDashboard() {
               <li>Ensure stable internet connection.</li>
               <li>No retake after submission.</li>
             </ul>
-            <div className="m-btn">
+            <div className="modal-action">
               <button className="confirm-btn" onClick={startExam}>
                 Start Now
               </button>
