@@ -211,3 +211,28 @@
 .create-btn:hover {
   background: #0b5ed7;
 }
+
+/* MOBILE RESPONSIVE FIX */
+@media screen and (max-width: 768px) {
+
+  .admin-dashboard {
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .main-content {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .sidebar button,
+  .sidebar a {
+    width: 100%;
+  }
+}
