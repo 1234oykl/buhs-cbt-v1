@@ -9,10 +9,10 @@
 .dashboard-header {
   background: linear-gradient(135deg, #0d47a1, #1976d2);
   color: white;
-  margin-bottom: 10px ;
+  margin-bottom: 10px;
   padding: 10px 30px;
   border-radius: 15px;
-  
+
   box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
 }
 
@@ -212,7 +212,44 @@
 }
 
 .modal-actions {
-  display: flex;
-  justify-content: space-between;
   margin-top: 20px;
+}
+
+.confirm-btn {
+  margin-right: 10px;
+  background: #1c6feb;
+  border: none;
+  padding: 10px 10px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+.cancel-btn {
+  background: #1c6feb;
+  border: none;
+  padding: 10px 10px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+.confirm-btn:hover {
+  background: #0244a7;
+}
+
+.cancel-btn:hover {
+  background: #0244a7;
+}
+
+.m-btn {
+}
+
+@media screen and (max-width: 768px) {
+  .admin-dashboard,
+  .student-dashboard {
+    flex-direction: column;
+  }
 }

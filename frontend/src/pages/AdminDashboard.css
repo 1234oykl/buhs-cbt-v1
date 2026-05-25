@@ -185,3 +185,29 @@
 .data-table tr:hover {
   background: #f2f2f2;
 }
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.create-btn {
+  margin-right: 10px;
+  background: #1c6feb;
+  border: none;
+  padding: 10px 10px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+.create-btn:hover {
+  background: #0b5ed7;
+}

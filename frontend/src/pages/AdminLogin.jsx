@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../config/api";
 import { useNavigate, Link } from "react-router-dom";
 import "./AdminLogin.css";
 
@@ -23,41 +23,36 @@ function AdminLogin() {
     setError("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    try {
-      setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      const res = await axios.post(
-        "http://localhost:5000/api/users/admin/login",
-        formData,
-      );
+  try {
+    setLoading(true);
+    setError("");
 
-      console.log("ADMIN LOGIN RESPONSE:", res.data);
+    const res = await api.post("/users/admin/login", formData);
 
-      // ✅ SAVE ADMIN SESSION
-      if (res.data.isAdmin) {
-        localStorage.setItem("admin", JSON.stringify(res.data));
-        navigate("/admin-dashboard");
-      }
-      console.log("STORED ADMIN:", localStorage.getItem("admin"));
+    console.log("ADMIN LOGIN RESPONSE:", res.data);
 
-      setLoading(false);
+    // SAVE SESSION
+    localStorage.setItem("user", JSON.stringify(res.data));
 
-      // 🔥 IMPORTANT: SAFE REDIRECT CHECK
-      if (res.data?.isAdmin) {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/student-dashboard");
-      }
-    } catch (err) {
-      console.log(err.response?.data || err.message);
+    setLoading(false);
 
-      setLoading(false);
-      setError(err.response?.data?.message || "Admin login failed");
+    // SINGLE CLEAN REDIRECT
+    if (res.data.isAdmin) {
+      navigate("/admin");
+    } else {
+      navigate("/login");
     }
-  };
+
+  } catch (err) {
+    setLoading(false);
+    console.log(err.response?.data || err.message);
+    setError(err.response?.data?.message || "Admin login failed");
+  }
+};
 
   return (
     <div className="login-container">

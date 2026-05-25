@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../config/api";
 import { useParams, Link } from "react-router-dom";
 import "./Leaderboard.css";
 
@@ -16,27 +16,39 @@ function Leaderboard() {
         setLoading(true);
         setError("");
 
-        const user = JSON.parse(localStorage.getItem("user"));
-
-        const config = {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        };
-
-        const res = await axios.get(
-          `http://localhost:5000/api/results/leaderboard/${examId}`,
-          config,
+        const user = JSON.parse(
+          localStorage.getItem("user")
         );
 
-        setData(res.data);
+        if (!user || !user.token) {
+          setError("Unauthorized access");
+          setLoading(false);
+          return;
+        }
+
+        const res = await api.get(
+          `/results/leaderboard/${examId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
+
+        setData(res.data || []);
         setLoading(false);
+
       } catch (err) {
-        console.log("Leaderboard Error:", err.response?.data || err.message);
+        console.log(
+          "Leaderboard Error:",
+          err.response?.data || err.message
+        );
+
         setError("Failed to load leaderboard.");
         setLoading(false);
       }
     };
+
     fetchBoard();
   }, [examId]);
 
@@ -49,49 +61,79 @@ function Leaderboard() {
 
   return (
     <div className="leaderboard-page">
+
+      {/* HEADER */}
       <div className="leaderboard-header">
         <h2>🏆 Leaderboard</h2>
 
-        <Link to="/student-dashboard" className="back-btn">
+        <Link
+          to="/student-dashboard"
+          className="back-btn"
+        >
           ⬅ Back to Dashboard
         </Link>
       </div>
 
-      {loading && <p className="loading">Loading leaderboard...</p>}
-
-      {error && <p className="error">{error}</p>}
-
-      {!loading && !error && data.length === 0 && (
-        <p className="empty">No leaderboard data yet.</p>
+      {/* LOADING */}
+      {loading && (
+        <p className="loading">
+          Loading leaderboard...
+        </p>
       )}
 
-      {!loading && !error && data.length > 0 && (
-        <table className="leaderboard-table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Name</th>
-              <th>Class</th>
-              <th>Score</th>
-              <th>Percentage</th>
-            </tr>
-          </thead>
+      {/* ERROR */}
+      {error && (
+        <p className="error">{error}</p>
+      )}
 
-          <tbody>
-            {data.map((item, index) => (
-              <tr key={item._id}>
-                <td className="rank">{getRankBadge(index)}</td>
-                <td>{item.student?.name}</td>
-                <td>{item.student?.className}</td>
-                <td>
-                  {item.score} / {item.total}
-                </td>
-                <td>{item.percentage ?? 0}%</td>
+      {/* EMPTY STATE */}
+      {!loading &&
+        !error &&
+        data.length === 0 && (
+          <p className="empty">
+            No leaderboard data yet.
+          </p>
+        )}
+
+      {/* TABLE */}
+      {!loading &&
+        !error &&
+        data.length > 0 && (
+          <table className="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Score</th>
+                <th>Percentage</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+
+            <tbody>
+              {data.map((item, index) => (
+                <tr key={item._id}>
+                  <td className="rank">
+                    {getRankBadge(index)}
+                  </td>
+                  <td>
+                    {item.student?.name}
+                  </td>
+                  <td>
+                    {item.student?.className}
+                  </td>
+                  <td>
+                    {item.score} /{" "}
+                    {item.total}
+                  </td>
+                  <td>
+                    {item.percentage ?? 0}%
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
     </div>
   );
 }

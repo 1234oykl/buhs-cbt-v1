@@ -195,3 +195,9 @@
     grid-template-columns: repeat(8, 1fr);
   }
 }
+
+@media screen and (max-width: 768px) {
+  .cbt-body {
+    flex-direction: column;
+  }
+}

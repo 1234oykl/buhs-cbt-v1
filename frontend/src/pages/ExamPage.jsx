@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../config/api";
 import "./ExamPage.css";
 
 function ExamPage() {
@@ -21,6 +21,15 @@ function ExamPage() {
   const token = user?.token;
 
   // =============================
+  // CHECK LOGIN
+  // =============================
+  useEffect(() => {
+    if (!user || !token) {
+      navigate("/login");
+    }
+  }, [navigate, token, user]);
+
+  // =============================
   // SUBMIT EXAM
   // =============================
   const submitExam = useCallback(
@@ -38,8 +47,8 @@ function ExamPage() {
       setSubmitted(true);
 
       try {
-        await axios.post(
-          "https://buhs-cbt-v1.onrender.com/api/results/submit",
+        await api.post(
+          "/results/submit",
           {
             student: user._id,
             exam: id,
@@ -59,6 +68,7 @@ function ExamPage() {
         alert("Exam submitted successfully!");
 
         navigate("/student-dashboard");
+
       } catch (err) {
         console.log(
           "Submit error:",
@@ -67,7 +77,7 @@ function ExamPage() {
 
         alert(
           err.response?.data?.message ||
-            "Error submitting exam."
+          "Error submitting exam."
         );
 
         setSubmitted(false);
@@ -90,10 +100,12 @@ function ExamPage() {
   // RESTORE ANSWERS
   // =============================
   useEffect(() => {
-    const saved = localStorage.getItem(`exam_${id}_answers`);
+    const savedAnswers = localStorage.getItem(
+      `exam_${id}_answers`
+    );
 
-    if (saved) {
-      setAnswers(JSON.parse(saved));
+    if (savedAnswers) {
+      setAnswers(JSON.parse(savedAnswers));
     }
   }, [id]);
 
@@ -112,20 +124,26 @@ function ExamPage() {
       setTimeLeft((prev) => {
         const updated = prev - 1;
 
-        localStorage.setItem(`exam_time_${id}`, updated);
+        localStorage.setItem(
+          `exam_time_${id}`,
+          updated
+        );
 
         return updated;
       });
     }, 1000);
 
     return () => clearInterval(timer);
+
   }, [exam, submitted, timeLeft, id, submitExam]);
 
   // =============================
   // RESTORE TIMER
   // =============================
   useEffect(() => {
-    const savedTime = localStorage.getItem(`exam_time_${id}`);
+    const savedTime = localStorage.getItem(
+      `exam_time_${id}`
+    );
 
     if (savedTime) {
       setTimeLeft(Number(savedTime));
@@ -140,8 +158,8 @@ function ExamPage() {
       try {
         setLoading(true);
 
-        const res = await axios.post(
-          "https://buhs-cbt-v1.onrender.com/api/exams/start",
+        const res = await api.post(
+          "/exams/start",
           { examId: id },
           {
             headers: {
@@ -152,9 +170,13 @@ function ExamPage() {
 
         setExam(res.data.exam);
 
-        setQuestions(res.data.shuffledQuestions || []);
+        setQuestions(
+          res.data.shuffledQuestions || []
+        );
 
-        const savedTime = localStorage.getItem(`exam_time_${id}`);
+        const savedTime = localStorage.getItem(
+          `exam_time_${id}`
+        );
 
         setTimeLeft(
           savedTime
@@ -163,6 +185,7 @@ function ExamPage() {
         );
 
         setLoading(false);
+
       } catch (err) {
         console.log(
           "Error loading exam:",
@@ -173,7 +196,10 @@ function ExamPage() {
       }
     };
 
-    fetchExam();
+    if (token) {
+      fetchExam();
+    }
+
   }, [id, token]);
 
   // =============================
@@ -199,8 +225,12 @@ function ExamPage() {
     window.addEventListener("blur", handleBlur);
 
     return () => {
-      window.removeEventListener("blur", handleBlur);
+      window.removeEventListener(
+        "blur",
+        handleBlur
+      );
     };
+
   }, [submitted, submitExam]);
 
   // =============================
@@ -240,25 +270,48 @@ function ExamPage() {
     return `${mins}:${String(secs).padStart(2, "0")}`;
   };
 
-  const goToQuestion = (index) => setCurrent(index);
+  // =============================
+  // NAVIGATION
+  // =============================
+  const goToQuestion = (index) => {
+    setCurrent(index);
+  };
 
   // =============================
-  // LOADING STATES
+  // LOADING
   // =============================
-  if (loading)
-    return <h2 style={{ padding: "20px" }}>Loading Exam...</h2>;
+  if (loading) {
+    return (
+      <h2 style={{ padding: "20px" }}>
+        Loading Exam...
+      </h2>
+    );
+  }
 
-  if (!exam)
-    return <h2 style={{ padding: "20px" }}>Exam not found</h2>;
+  if (!exam) {
+    return (
+      <h2 style={{ padding: "20px" }}>
+        Exam not found
+      </h2>
+    );
+  }
 
   const question = questions[current];
 
-  if (!question)
-    return <h2 style={{ padding: "20px" }}>No questions found</h2>;
+  if (!question) {
+    return (
+      <h2 style={{ padding: "20px" }}>
+        No questions found
+      </h2>
+    );
+  }
 
   return (
     <div className="cbt-wrapper">
+
+      {/* HEADER */}
       <div className="cbt-header">
+
         <h2>{exam.title}</h2>
 
         <h3 className="timer">
@@ -266,10 +319,15 @@ function ExamPage() {
         </h3>
 
         <p>Tab Switches: {tabSwitches}</p>
+
       </div>
 
+      {/* BODY */}
       <div className="cbt-body">
+
+        {/* QUESTION PANEL */}
         <div className="question-panel">
+
           <h3>
             Question {current + 1} of {questions.length}
           </h3>
@@ -279,6 +337,7 @@ function ExamPage() {
           </p>
 
           <div className="options">
+
             {question.options?.map((opt, i) => (
               <label
                 key={i}
@@ -288,6 +347,7 @@ function ExamPage() {
                     : ""
                 }`}
               >
+
                 <input
                   type="radio"
                   name={`question-${current}`}
@@ -296,32 +356,45 @@ function ExamPage() {
                 />
 
                 <span>{opt}</span>
+
               </label>
             ))}
+
           </div>
         </div>
 
+        {/* PALETTE */}
         <div className="palette-panel">
+
           <h3>Question Palette</h3>
 
           <div className="question-palette">
+
             {questions.map((q, index) => (
               <button
                 key={index}
                 className={`palette-btn ${
-                  index === current ? "active" : ""
+                  index === current
+                    ? "active"
+                    : ""
                 } ${
-                  answers[index] ? "answered" : ""
+                  answers[index]
+                    ? "answered"
+                    : ""
                 }`}
-                onClick={() => goToQuestion(index)}
+                onClick={() =>
+                  goToQuestion(index)
+                }
               >
                 {index + 1}
               </button>
             ))}
+
           </div>
 
           <p>
-            Answered: {Object.keys(answers).length} /{" "}
+            Answered:{" "}
+            {Object.keys(answers).length} /{" "}
             {questions.length}
           </p>
 
@@ -331,23 +404,33 @@ function ExamPage() {
           >
             Finish & Submit
           </button>
+
         </div>
       </div>
 
+      {/* FOOTER */}
       <div className="cbt-footer">
+
         <button
           disabled={current === 0}
-          onClick={() => setCurrent(current - 1)}
+          onClick={() =>
+            setCurrent(current - 1)
+          }
         >
           ⬅ Previous
         </button>
 
         <button
-          disabled={current === questions.length - 1}
-          onClick={() => setCurrent(current + 1)}
+          disabled={
+            current === questions.length - 1
+          }
+          onClick={() =>
+            setCurrent(current + 1)
+          }
         >
           Next ➡
         </button>
+
       </div>
     </div>
   );

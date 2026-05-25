@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../config/api"; // IMPORTANT FIX
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 
@@ -31,23 +31,24 @@ function Login() {
       setLoading(true);
       setError("");
 
-      const res = await axios.post("http://localhost:5000/api/users/login", {
+      const res = await api.post("/users/login", {
         className,
         admissionNo,
       });
 
       console.log("LOGIN SUCCESS:", res.data);
 
-      // store student session
-      if (!res.data.isAdmin) {
-        localStorage.setItem("user", JSON.stringify(res.data));
+      // Save user
+      localStorage.setItem("user", JSON.stringify(res.data));
+
+      // ROUTING FIX
+      if (res.data.isAdmin) {
+        navigate("/admin");
+      } else {
         navigate("/student-dashboard");
       }
 
       setLoading(false);
-
-      // IMPORTANT: must match App.js route exactly
-      navigate("/student-dashboard");
     } catch (err) {
       setLoading(false);
       setError(err.response?.data?.message || "Login failed");

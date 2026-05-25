@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../config/api"; // IMPORTANT FIX
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
 
@@ -33,43 +33,33 @@ function Register() {
   // HANDLE REGISTER
   // =========================
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!name || !className || !admissionNo) {
-      setError("Please fill in all fields");
-      return;
-    }
+  if (!name || !className || !admissionNo) {
+    setError("Please fill in all fields");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      await axios.post(
-        "http://127.0.0.1:5000/api/users/register",
-        formData
-      );
+    await api.post("/users/register", formData);
 
-      setLoading(false);
+    setLoading(false);
+    navigate("/login");
 
-      navigate("/login");
+  } catch (err) {
+    setLoading(false);
 
-    } catch (err) {
-      setLoading(false);
+    console.log("FULL ERROR:", err);
 
-      console.log("FULL ERROR:", err);
-
-      if (err.response) {
-        setError(
-          err.response.data.message ||
-          "Registration failed"
-        );
-      } else {
-        setError(
-          "Server not reachable. Check backend."
-        );
-      }
-    }
-  };
+    setError(
+      err.response?.data?.message ||
+      "Registration failed"
+    );
+  }
+};
 
   return (
     <div className="register-container">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../config/api";
 import { useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
 
@@ -47,14 +47,11 @@ function StudentDashboard() {
         };
 
         // ✅ FIX: get ALL exams, backend should filter by class
-        const examsRes = await axios.get(
-          "http://localhost:5000/api/exams",
-          config
-        );
+        const examsRes = await api.get("/exams", config);
 
-        const resultsRes = await axios.get(
-          `http://localhost:5000/api/results/student/${user._id}`,
-          config
+        const resultsRes = await api.get(
+          `/results/student/${user._id}`,
+          config,
         );
 
         setExams(examsRes.data || []);
@@ -71,6 +68,11 @@ function StudentDashboard() {
     fetchDashboard();
   }, [navigate]);
 
+  // Check if exam is completed
+  const isExamCompleted = (examId) => {
+    return results.some((r) => r.exam?._id === examId || r.exam === examId);
+  };
+
   // Filter exams (search + class match)
   const filteredExams = exams.filter((e) => {
     const searchMatch =
@@ -81,18 +83,12 @@ function StudentDashboard() {
       student?.className &&
       e.className &&
       student.className
+        .trim()
         .toUpperCase()
-        .startsWith(e.className.toUpperCase());
+        .startsWith(e.className.trim().toUpperCase());
 
     return searchMatch && classMatch;
   });
-
-  // Check if exam is completed
-  const isExamCompleted = (examId) => {
-    return results.some(
-      (r) => r.exam?._id === examId || r.exam === examId
-    );
-  };
 
   // Open modal
   const openInstructions = (exam) => {
@@ -110,7 +106,6 @@ function StudentDashboard() {
 
   return (
     <div className="student-dashboard">
-
       {/* HEADER */}
       <div className="dashboard-header">
         <h1>Student Dashboard</h1>
@@ -122,8 +117,12 @@ function StudentDashboard() {
       {/* STUDENT INFO */}
       <div className="student-info-card">
         <div>
-          <p><b>Class:</b> {student?.className}</p>
-          <p><b>Admission No:</b> {student?.admissionNo}</p>
+          <p>
+            <b>Class:</b> {student?.className}
+          </p>
+          <p>
+            <b>Admission No:</b> {student?.admissionNo}
+          </p>
         </div>
 
         <button className="logout-btn" onClick={handleLogout}>
@@ -159,30 +158,26 @@ function StudentDashboard() {
 
             return (
               <div className="exam-card" key={exam._id}>
-
                 <h3>{exam.title}</h3>
 
                 <div className="exam-meta">
                   <span className="badge subject">
                     {exam.subject || "No Subject"}
                   </span>
-                  <span className="badge duration">
-                    {exam.duration} mins
-                  </span>
+                  <span className="badge duration">{exam.duration} mins</span>
                   <span className="badge questions">
                     {exam.questions?.length || 0} Questions
                   </span>
                 </div>
 
                 <p className="exam-date">
-                  📅 {exam.date
+                  📅{" "}
+                  {exam.date
                     ? new Date(exam.date).toLocaleDateString()
                     : "No date"}
                 </p>
 
-                {completed && (
-                  <p className="completed-badge">✅ Completed</p>
-                )}
+                {completed && <p className="completed-badge">✅ Completed</p>}
 
                 <button
                   className="start-btn"
@@ -201,15 +196,19 @@ function StudentDashboard() {
       {showModal && selectedExam && (
         <div className="modal-overlay">
           <div className="modal-box">
-
             <h2>📌 Exam Instructions</h2>
 
-            <p><b>Exam:</b> {selectedExam.title}</p>
-            <p><b>Subject:</b> {selectedExam.subject}</p>
-            <p><b>Duration:</b> {selectedExam.duration} mins</p>
             <p>
-              <b>Total Questions:</b>{" "}
-              {selectedExam.questions?.length || 0}
+              <b>Exam:</b> {selectedExam.title}
+            </p>
+            <p>
+              <b>Subject:</b> {selectedExam.subject}
+            </p>
+            <p>
+              <b>Duration:</b> {selectedExam.duration} mins
+            </p>
+            <p>
+              <b>Total Questions:</b> {selectedExam.questions?.length || 0}
             </p>
 
             <hr />
@@ -220,22 +219,21 @@ function StudentDashboard() {
               <li>Ensure stable internet connection.</li>
               <li>No retake after submission.</li>
             </ul>
+            <div className="m-btn">
+              <button className="confirm-btn" onClick={startExam}>
+                Start Now
+              </button>
 
-            <button className="confirm-btn" onClick={startExam}>
-              Start Now
-            </button>
-
-            <button
-              className="cancel-btn"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-
+              <button
+                className="cancel-btn"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

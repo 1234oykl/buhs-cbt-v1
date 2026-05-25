@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -9,7 +10,6 @@ import StudentDashboard from "./pages/StudentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ExamPage from "./pages/ExamPage";
 import Leaderboard from "./pages/Leaderboard";
-import CreateExam from "./pages/CreateExam";
 import AdminLogin from "./pages/AdminLogin";
 import AdminExamPage from "./pages/AdminExamPage";
 import ExamSubmitted from "./pages/ExamSubmitted";
@@ -17,16 +17,27 @@ import ExamSubmitted from "./pages/ExamSubmitted";
 function App() {
   return (
     <Routes>
-      {/* PUBLIC PAGES (WITH HEADER) */}
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/create-exam" element={<CreateExam />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/exam-submitted" element={<ExamSubmitted />} />
 
-        {/* 🔐 STUDENT PROTECTED ROUTE */}
+      {/* PUBLIC ROUTES */}
+      <Route element={<Layout />}>
+
+        <Route path="/" element={<Home />} />
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/register" element={<Register />} />
+
+        <Route
+          path="/admin-login"
+          element={<AdminLogin />}
+        />
+
+        <Route
+          path="/exam-submitted"
+          element={<ExamSubmitted />}
+        />
+
+        {/* STUDENT DASHBOARD */}
         <Route
           path="/student-dashboard"
           element={
@@ -36,9 +47,9 @@ function App() {
           }
         />
 
-        {/* 🔐 ADMIN PROTECTED ROUTE */}
+        {/* ADMIN DASHBOARD */}
         <Route
-          path="/admin-dashboard"
+          path="/admin"
           element={
             <ProtectedRoute role="admin">
               <AdminDashboard />
@@ -46,6 +57,7 @@ function App() {
           }
         />
 
+        {/* EXAM PAGE */}
         <Route
           path="/exam/:id"
           element={
@@ -55,6 +67,7 @@ function App() {
           }
         />
 
+        {/* LEADERBOARD */}
         <Route
           path="/leaderboard/:examId"
           element={
@@ -64,14 +77,16 @@ function App() {
           }
         />
 
+        {/* CREATE EXAM */}
         <Route
-  path="/admin-add-exam"
-  element={
-    <ProtectedRoute role="admin">
-      <AdminExamPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/admin-add-exam"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminExamPage />
+            </ProtectedRoute>
+          }
+        />
+
       </Route>
     </Routes>
   );

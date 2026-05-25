@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../config/api";
 import { useNavigate } from "react-router-dom";
 import "./AdminExamPage.css";
 
@@ -25,25 +25,38 @@ function AdminExamPage() {
   // =========================
   const handleQuestionChange = (index, value) => {
     const updated = [...questions];
+
     updated[index].question = value;
+
     setQuestions(updated);
   };
 
   // =========================
   // HANDLE OPTION CHANGE
   // =========================
-  const handleOptionChange = (qIndex, optIndex, value) => {
+  const handleOptionChange = (
+    qIndex,
+    optIndex,
+    value
+  ) => {
     const updated = [...questions];
+
     updated[qIndex].options[optIndex] = value;
+
     setQuestions(updated);
   };
 
   // =========================
   // HANDLE CORRECT ANSWER
   // =========================
-  const handleCorrectAnswer = (qIndex, value) => {
+  const handleCorrectAnswer = (
+    qIndex,
+    value
+  ) => {
     const updated = [...questions];
+
     updated[qIndex].correctAnswer = value;
+
     setQuestions(updated);
   };
 
@@ -67,7 +80,10 @@ function AdminExamPage() {
   const removeQuestion = (index) => {
     if (questions.length === 1) return;
 
-    const updated = questions.filter((_, i) => i !== index);
+    const updated = questions.filter(
+      (_, i) => i !== index
+    );
+
     setQuestions(updated);
   };
 
@@ -77,7 +93,7 @@ function AdminExamPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
+    // BASIC VALIDATION
     if (
       !title ||
       !className ||
@@ -89,59 +105,88 @@ function AdminExamPage() {
       return;
     }
 
-    // Question validation
+    // QUESTIONS VALIDATION
     for (let q of questions) {
+
       if (!q.question.trim()) {
-        alert("Every question must have a question.");
+        alert(
+          "Every question must have a question."
+        );
         return;
       }
 
-      if (q.options.some((opt) => opt.trim() === "")) {
+      if (
+        q.options.some(
+          (opt) => opt.trim() === ""
+        )
+      ) {
         alert("All options must be filled.");
         return;
       }
 
       if (!q.correctAnswer) {
-        alert("Please select the correct answer.");
+        alert(
+          "Please select the correct answer."
+        );
         return;
       }
     }
 
     try {
-      const admin = JSON.parse(localStorage.getItem("admin"));
+      const user = JSON.parse(
+        localStorage.getItem("user")
+      );
 
-      if (!admin || !admin.token) {
+      // CHECK ADMIN LOGIN
+      if (
+        !user ||
+        !user.token ||
+        !user.isAdmin
+      ) {
         alert("Admin login required");
+
         navigate("/admin-login");
+
         return;
       }
 
       const examData = {
-        title,
-        className,
-        subject,
+        title: title.trim(),
+        className: className
+          .trim()
+          .toUpperCase(),
+        subject: subject.trim(),
         duration: Number(duration),
         date: examDate,
         questions,
       };
 
-      console.log("SENDING EXAM:", examData);
+      console.log(
+        "SENDING EXAM:",
+        examData
+      );
 
-      await axios.post(
-        "http://127.0.0.1:5000/api/exams",
+      await api.post(
+        "/exams",
         examData,
         {
           headers: {
-            Authorization: `Bearer ${admin.token}`,
+            Authorization: `Bearer ${user.token}`,
           },
         }
       );
 
       alert("Exam created successfully!");
 
-      navigate("/admin-dashboard");
+      navigate("/admin");
+
     } catch (err) {
-      console.log("FULL ERROR:", err.response?.data || err.message);
+
+      console.log(
+        "FULL ERROR:",
+        err.response?.data ||
+          err.message
+      );
 
       alert(
         err.response?.data?.message ||
@@ -152,77 +197,110 @@ function AdminExamPage() {
 
   return (
     <div className="admin-add-exam">
+
       <h2>Create New Exam</h2>
 
-      <form onSubmit={handleSubmit} className="exam-form">
+      <form
+        onSubmit={handleSubmit}
+        className="exam-form"
+      >
 
         {/* EXAM TITLE */}
         <div className="form-group">
+
           <label>Exam Title</label>
 
           <input
             type="text"
             value={title}
             placeholder="Enter exam title"
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
           />
+
         </div>
 
         {/* CLASS */}
         <div className="form-group">
+
           <label>Class</label>
 
           <input
             type="text"
             value={className}
             placeholder="Enter class name (e.g SS1)"
-            onChange={(e) => setClassName(e.target.value)}
+            onChange={(e) =>
+              setClassName(e.target.value)
+            }
           />
+
         </div>
 
         {/* SUBJECT */}
         <div className="form-group">
+
           <label>Subject</label>
 
           <input
             type="text"
             value={subject}
             placeholder="Enter subject"
-            onChange={(e) => setSubject(e.target.value)}
+            onChange={(e) =>
+              setSubject(e.target.value)
+            }
           />
+
         </div>
 
         {/* DURATION */}
         <div className="form-group">
-          <label>Duration (minutes)</label>
+
+          <label>
+            Duration (minutes)
+          </label>
 
           <input
             type="number"
             value={duration}
             placeholder="Enter duration"
-            onChange={(e) => setDuration(e.target.value)}
+            onChange={(e) =>
+              setDuration(e.target.value)
+            }
           />
+
         </div>
 
         {/* EXAM DATE */}
         <div className="form-group">
+
           <label>Exam Date</label>
 
           <input
             type="date"
             value={examDate}
-            onChange={(e) => setExamDate(e.target.value)}
+            onChange={(e) =>
+              setExamDate(e.target.value)
+            }
           />
+
         </div>
 
         <hr />
 
-        <h3 style={{ color: "white" }}>Questions</h3>
+        <h3 style={{ color: "white" }}>
+          Questions
+        </h3>
 
         {questions.map((q, index) => (
-          <div key={index} className="question-box">
+          <div
+            key={index}
+            className="question-box"
+          >
 
+            {/* QUESTION HEADER */}
             <div className="question-header">
+
               <h4 style={{ color: "white" }}>
                 Question {index + 1}
               </h4>
@@ -230,10 +308,13 @@ function AdminExamPage() {
               <button
                 type="button"
                 className="remove-btn"
-                onClick={() => removeQuestion(index)}
+                onClick={() =>
+                  removeQuestion(index)
+                }
               >
                 Remove
               </button>
+
             </div>
 
             {/* QUESTION */}
@@ -241,31 +322,41 @@ function AdminExamPage() {
               value={q.question}
               placeholder="Enter question..."
               onChange={(e) =>
-                handleQuestionChange(index, e.target.value)
+                handleQuestionChange(
+                  index,
+                  e.target.value
+                )
               }
             />
 
             {/* OPTIONS */}
             <div className="options-grid">
-              {q.options.map((opt, optIndex) => (
-                <input
-                  key={optIndex}
-                  type="text"
-                  value={opt}
-                  placeholder={`Option ${optIndex + 1}`}
-                  onChange={(e) =>
-                    handleOptionChange(
-                      index,
-                      optIndex,
-                      e.target.value
-                    )
-                  }
-                />
-              ))}
+
+              {q.options.map(
+                (opt, optIndex) => (
+                  <input
+                    key={optIndex}
+                    type="text"
+                    value={opt}
+                    placeholder={`Option ${
+                      optIndex + 1
+                    }`}
+                    onChange={(e) =>
+                      handleOptionChange(
+                        index,
+                        optIndex,
+                        e.target.value
+                      )
+                    }
+                  />
+                )
+              )}
+
             </div>
 
             {/* CORRECT ANSWER */}
             <div className="correct-answer">
+
               <label
                 style={{
                   color: "white",
@@ -278,20 +369,31 @@ function AdminExamPage() {
               <select
                 value={q.correctAnswer}
                 onChange={(e) =>
-                  handleCorrectAnswer(index, e.target.value)
+                  handleCorrectAnswer(
+                    index,
+                    e.target.value
+                  )
                 }
               >
+
                 <option value="">
                   -- Select Correct Option --
                 </option>
 
                 {q.options.map((opt, i) => (
-                  <option key={i} value={opt}>
-                    {opt || `Option ${i + 1}`}
+                  <option
+                    key={i}
+                    value={opt}
+                  >
+                    {opt ||
+                      `Option ${i + 1}`}
                   </option>
                 ))}
+
               </select>
+
             </div>
+
           </div>
         ))}
 
@@ -305,9 +407,13 @@ function AdminExamPage() {
         </button>
 
         {/* SUBMIT BUTTON */}
-        <button type="submit" className="submit-btn">
+        <button
+          type="submit"
+          className="submit-btn" style={{padding: "12px", background: "blue" }}
+        >
           Create Exam
         </button>
+
       </form>
     </div>
   );
