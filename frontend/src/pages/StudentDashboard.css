@@ -104,14 +104,13 @@ body {
 
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+
   gap: 10px;
 
-  height: auto;
-  overflow: visible;
-}
-
-.exam-card {
-  overflow-wrap: break-word;
+  width: 100%;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .exam-card:hover {
@@ -122,8 +121,9 @@ body {
 .exam-card h3 {
   margin-bottom: 12px;
   font-size: 18px;
-  line-height: 1.4;
+
   word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* BADGES */
@@ -343,4 +343,10 @@ body {
     width: 100%;
     box-sizing: border-box;
   }
+
+  .start-btn {
+  display: block;
+  width: 100%;
+  margin-top: 15px;
+}
 }
