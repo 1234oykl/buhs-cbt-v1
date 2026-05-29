@@ -5,6 +5,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.16.0",
+    "bootstrap": "^5.3.8",
     "cra-template-redux": "2.0.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.38.0",

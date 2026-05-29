@@ -1,257 +1,164 @@
 import { useState } from "react";
-import api from "../config/api";
-import "./CreateExam.css";
 
 function CreateExam() {
   const [title, setTitle] = useState("");
   const [duration, setDuration] = useState("");
   const [questions, setQuestions] = useState([]);
 
-  // =========================
-  // ADD QUESTION
-  // =========================
   const addQuestion = () => {
     setQuestions([
       ...questions,
       {
         question: "",
         options: ["", "", "", ""],
-        correctAnswer: "",
-        marks: 1,
+        correctAnswer: null,
       },
     ]);
   };
 
-  // =========================
-  // UPDATE QUESTION
-  // =========================
-  const handleQuestionChange = (value, index) => {
+  const handleQuestionChange = (value, i) => {
     const updated = [...questions];
-    updated[index].question = value;
+    updated[i].question = value;
     setQuestions(updated);
   };
 
-  // =========================
-  // UPDATE OPTIONS
-  // =========================
-  const handleOptionChange = (value, qIndex, optIndex) => {
+  const handleOptionChange = (value, qi, oi) => {
     const updated = [...questions];
-    updated[qIndex].options[optIndex] = value;
+    updated[qi].options[oi] = value;
     setQuestions(updated);
   };
 
-  // =========================
-  // SET CORRECT ANSWER
-  // =========================
-  const setCorrectAnswer = (value, index) => {
+  const setCorrectAnswer = (qi, oi) => {
     const updated = [...questions];
-    updated[index].correctAnswer = value;
+    updated[qi].correctAnswer = oi;
     setQuestions(updated);
   };
 
-  // =========================
-  // DELETE QUESTION
-  // =========================
-  const deleteQuestion = (index) => {
-    const updated = questions.filter((_, i) => i !== index);
-    setQuestions(updated);
-  };
-
-  // =========================
-  // SUBMIT EXAM
-  // =========================
-  const handleSubmit = async () => {
-    try {
-      // VALIDATION
-      if (!title || !duration) {
-        return alert("Title and duration are required");
-      }
-
-      if (questions.length === 0) {
-        return alert("Add at least one question");
-      }
-
-      for (let q of questions) {
-        if (
-          !q.question ||
-          q.options.some((opt) => opt.trim() === "") ||
-          !q.correctAnswer
-        ) {
-          return alert("Please complete all questions properly");
-        }
-      }
-
-      // GET ADMIN
-      const user = JSON.parse(
-        localStorage.getItem("user")
-      );
-
-      if (!user || !user.token || !user.isAdmin) {
-        alert("Admin login required");
-        return;
-      }
-
-      // API CALL (DEPLOYMENT SAFE)
-      await api.post(
-        "/exams",
-        {
-          title,
-          duration,
-          questions,
-          createdAt: new Date(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-
-      alert("Exam created successfully!");
-
-      // RESET FORM
-      setTitle("");
-      setDuration("");
-      setQuestions([]);
-
-    } catch (err) {
-      console.log(
-        err.response?.data || err.message
-      );
-
-      alert(
-        err.response?.data?.message ||
-          "Error creating exam"
-      );
-    }
+  const deleteQuestion = (i) => {
+    setQuestions(questions.filter((_, index) => index !== i));
   };
 
   return (
-    <div className="exam-builder">
+    <div className="container py-4">
 
-      <h1>🧠 Advanced Exam Builder</h1>
+      {/* ===== HEADER ===== */}
+      <h2 className="text-center fw-bold mb-4">
+        🧠 CBT Exam Builder
+      </h2>
 
-      {/* BASIC INFO */}
-      <div className="exam-info">
+      {/* ===== EXAM INFO ===== */}
+      <div className="card shadow-sm p-3 mb-4">
+        <div className="row g-3">
 
-        <input
-          placeholder="Exam Title"
-          value={title}
-          onChange={(e) =>
-            setTitle(e.target.value)
-          }
-        />
+          <div className="col-md-6">
+            <label className="form-label">Exam Title</label>
+            <input
+              className="form-control"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter exam title"
+            />
+          </div>
 
-        <input
-          placeholder="Duration (minutes)"
-          value={duration}
-          onChange={(e) =>
-            setDuration(e.target.value)
-          }
-        />
+          <div className="col-md-6">
+            <label className="form-label">Duration (minutes)</label>
+            <input
+              type="number"
+              className="form-control"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="e.g 60"
+            />
+          </div>
 
+        </div>
       </div>
 
-      {/* QUESTIONS */}
-      {questions.map((q, qIndex) => (
-        <div
-          key={qIndex}
-          className="question-card"
-        >
+      {/* ===== QUESTIONS ===== */}
+      {questions.map((q, i) => (
+        <div key={i} className="card shadow-sm p-3 mb-3">
 
-          <h3>
-            Question {qIndex + 1}
-          </h3>
+          {/* QUESTION HEADER */}
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h5 className="mb-0">Question {i + 1}</h5>
 
-          <input
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => deleteQuestion(i)}
+            >
+              Delete
+            </button>
+          </div>
+
+          {/* QUESTION INPUT */}
+          <textarea
+            className="form-control mb-3"
             placeholder="Enter question"
             value={q.question}
             onChange={(e) =>
-              handleQuestionChange(
-                e.target.value,
-                qIndex
-              )
+              handleQuestionChange(e.target.value, i)
             }
           />
 
           {/* OPTIONS */}
-          {q.options.map(
-            (opt, optIndex) => (
-              <div
-                key={optIndex}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
+          <div className="row g-2">
 
-                <input
-                  placeholder={`Option ${
-                    optIndex + 1
-                  }`}
-                  value={opt}
-                  onChange={(e) =>
-                    handleOptionChange(
-                      e.target.value,
-                      qIndex,
-                      optIndex
-                    )
-                  }
-                />
+            {q.options.map((opt, oi) => (
+              <div className="col-md-6" key={oi}>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCorrectAnswer(
-                      opt,
-                      qIndex
-                    )
-                  }
-                  style={{
-                    background:
-                      q.correctAnswer ===
-                      opt
-                        ? "green"
-                        : "#ccc",
-                    color:
-                      q.correctAnswer ===
-                      opt
-                        ? "white"
-                        : "black",
-                    padding: "5px",
-                  }}
-                >
-                  {q.correctAnswer ===
-                  opt
-                    ? "✔ Correct"
-                    : "Mark Correct"}
-                </button>
+                <div className="input-group">
+
+                  <input
+                    className="form-control"
+                    placeholder={`Option ${oi + 1}`}
+                    value={opt}
+                    onChange={(e) =>
+                      handleOptionChange(
+                        e.target.value,
+                        i,
+                        oi
+                      )
+                    }
+                  />
+
+                  <button
+                    type="button"
+                    className={`btn ${
+                      q.correctAnswer === oi
+                        ? "btn-success"
+                        : "btn-outline-secondary"
+                    }`}
+                    onClick={() =>
+                      setCorrectAnswer(i, oi)
+                    }
+                  >
+                    ✔
+                  </button>
+
+                </div>
 
               </div>
-            )
-          )}
+            ))}
 
-          {/* DELETE QUESTION */}
-          <button
-            onClick={() =>
-              deleteQuestion(qIndex)
-            }
-          >
-            ❌ Delete Question
-          </button>
+          </div>
 
         </div>
       ))}
 
-      {/* ACTIONS */}
-      <div className="actions">
+      {/* ===== ACTIONS ===== */}
+      <div className="d-flex justify-content-between mt-4">
 
-        <button onClick={addQuestion}>
+        <button
+          className="btn btn-success"
+          onClick={addQuestion}
+        >
           ➕ Add Question
         </button>
 
-        <button onClick={handleSubmit}>
+        <button
+          className="btn btn-primary"
+          onClick={() => console.log(questions)}
+        >
           💾 Save Exam
         </button>
 

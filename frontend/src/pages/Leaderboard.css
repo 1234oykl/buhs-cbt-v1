@@ -1,12 +1,23 @@
+
+/* =========================
+   PAGE WRAPPER
+========================= */
 .leaderboard-page {
-  padding: 30px;
+  padding: 20px;
   font-family: Arial, sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
 }
 
+/* =========================
+   HEADER
+========================= */
 .leaderboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap; /* FIX MOBILE BREAK */
+  gap: 10px;
   margin-bottom: 20px;
 }
 
@@ -17,14 +28,18 @@
   padding: 10px 14px;
   border-radius: 8px;
   font-weight: bold;
+  transition: 0.2s;
 }
 
 .back-btn:hover {
   background: #084298;
 }
 
+/* =========================
+   STATES
+========================= */
 .loading {
-  font-size: 18px;
+  font-size: 16px;
   color: #333;
 }
 
@@ -34,10 +49,13 @@
 }
 
 .empty {
-  font-size: 16px;
+  font-size: 15px;
   color: gray;
 }
 
+/* =========================
+   TABLE WRAPPER (CRITICAL FIX)
+========================= */
 .leaderboard-table {
   width: 100%;
   border-collapse: collapse;
@@ -46,23 +64,64 @@
   overflow: hidden;
 }
 
+/* ADD RESPONSIVE SCROLL */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* =========================
+   TABLE STYLE
+========================= */
 .leaderboard-table th {
   background: #111827;
   color: white;
   padding: 12px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .leaderboard-table td {
   padding: 12px;
   border-bottom: 1px solid #ddd;
+  white-space: nowrap;
 }
 
 .leaderboard-table tr:hover {
   background: #f2f2f2;
 }
 
+/* =========================
+   RANK
+========================= */
 .rank {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
 }
+
+/* =========================
+   MOBILE RESPONSIVE FIX
+========================= */
+@media (max-width: 768px) {
+
+  .leaderboard-page {
+    padding: 10px;
+  }
+
+  .leaderboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .back-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
