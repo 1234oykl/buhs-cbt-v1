@@ -139,7 +139,8 @@ const createAdmin = asyncHandler(async (req, res) => {
     throw new Error("Admin already exists");
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const salt = await bcript.genSalt(10)
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   const admin = await User.create({
     name,
