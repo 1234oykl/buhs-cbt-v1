@@ -1,25 +1,4 @@
 html, body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
   font-family: Arial, sans-serif;
-  background: #f5f7fb;
-  -webkit-text-size-adjust: 100%;
-  touch-action: manipulation;
 }
 
-
-
-@media screen and (max-width: 768px) {
-  body {
-    font-size: 14px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .modal-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-  }
-}

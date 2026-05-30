@@ -84,7 +84,7 @@ function AdminDashboard() {
     <div className="admin-dashboard">
       {/* SIDEBAR */}
       <div className="sidebar">
-        <h2 className="logo">BUHS CBT</h2>
+        {/* <h2 className="logo">BUHS CBT</h2> */}
 
         <ul className="menu">
           <li

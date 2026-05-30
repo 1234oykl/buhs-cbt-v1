@@ -70,7 +70,7 @@ function Login() {
               name="className"
               value={className}
               onChange={handleChange}
-              placeholder="Enter Class (e.g SS1)"
+              placeholder="Enter Class (e.g SS1A)"
             />
           </div>
 

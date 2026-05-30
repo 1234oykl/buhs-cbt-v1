@@ -4,19 +4,6 @@ import "./Home.css";
 function Home() {
   return (
     <div className="home">
-      <div className="top-banner">
-        <div className="fade-left"></div>
-
-        <div className="ticker">
-          <div className="ticker-track">
-            🚀 Welcome to BUHS CBT Platform • 🧠 Practice Anytime, Anywhere • 🔒
-            Secure Examination System • ⚡ Fast & Reliable Performance • 📊
-            Track Your Progress Easily •
-          </div>
-        </div>
-
-        <div className="fade-right"></div>
-      </div>
 
       <div className="overlay">
         <div className="card">
