@@ -1,36 +1,26 @@
 import { useNavigate } from "react-router-dom";
+import "./ExamSubmitted.css";
 
 function ExamSubmitted() {
   const navigate = useNavigate();
 
   return (
-    <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
+    <div className="submitted-container">
+      <div className="submitted-card">
+        <h1>✅ Exam Submitted Successfully</h1>
 
-      <div className="card shadow-lg border-0 p-4 p-md-5 text-center" style={{ maxWidth: "500px", width: "100%" }}>
-
-        <div className="mb-3">
-          <h1 className="text-success fw-bold">
-            ✅ Exam Submitted Successfully
-          </h1>
-        </div>
-
-        <p className="text-muted mb-2">
+        <p>
           Your exam has been submitted successfully.
         </p>
 
-        <p className="text-muted mb-4">
+        <p>
           Please wait for your result from the administrator.
         </p>
 
-        <button
-          className="btn btn-primary w-100 fw-bold py-2"
-          onClick={() => navigate("/student-dashboard")}
-        >
+        <button onClick={() => navigate("/studentdashboard")}>
           Back to Dashboard
         </button>
-
       </div>
-
     </div>
   );
 }

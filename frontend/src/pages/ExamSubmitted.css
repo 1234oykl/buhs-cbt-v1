@@ -1,82 +1,40 @@
-/* FULL PAGE CENTER */
 .submitted-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #f4f6f9;
-  padding: 20px;
 }
 
-/* CARD */
 .submitted-card {
-  background: #ffffff;
-  padding: 35px;
-  border-radius: 12px;
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
   text-align: center;
-
-  width: 100%;
-  max-width: 450px;
-
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-
-  transition: transform 0.2s ease;
+  width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.submitted-card:hover {
-  transform: translateY(-3px);
-}
-
-/* TITLE */
 .submitted-card h1 {
-  color: #198754; /* Bootstrap success green */
-  margin-bottom: 18px;
-  font-size: 22px;
-  font-weight: bold;
+  color: green;
+  margin-bottom: 20px;
 }
 
-/* TEXT */
 .submitted-card p {
   margin-bottom: 10px;
-  color: #555;
-  font-size: 15px;
-  line-height: 1.4;
+  color: #444;
 }
 
-/* BUTTON */
 .submitted-card button {
   margin-top: 20px;
   padding: 12px 20px;
-
   border: none;
-  border-radius: 8px;
-
-  background: #0d6efd;
+  background: #007bff;
   color: white;
-
-  font-weight: bold;
+  border-radius: 5px;
   cursor: pointer;
-
-  width: 100%;
-
-  transition: 0.3s ease;
 }
 
 .submitted-card button:hover {
-  background: #0b5ed7;
-}
-
-/* MOBILE RESPONSIVE */
-@media (max-width: 480px) {
-  .submitted-card {
-    padding: 25px;
-  }
-
-  .submitted-card h1 {
-    font-size: 18px;
-  }
-
-  .submitted-card p {
-    font-size: 14px;
-  }
+  background: #0056b3;
 }

@@ -2,13 +2,13 @@
 .admin-add-exam {
   width: 100%;
   min-height: 100vh;
+  height: 100vh;
 
-  /* FIX SCROLL + MOBILE SAFETY */
+  /* ✅ FIX SCROLL ISSUE */
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 
   padding: 20px;
-  background: #000;
+  background: #000000;
   box-sizing: border-box;
 }
 
@@ -17,17 +17,16 @@
   text-align: center;
   margin-bottom: 20px;
   color: #ffffff;
-  font-size: 24px;
 }
 
 /* ===== FORM CONTAINER ===== */
 .exam-form {
   max-width: 900px;
   margin: 0 auto;
-  background: #1a1a1a;
+  background: #1a1919;
   padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== FORM GROUPS ===== */
@@ -35,41 +34,33 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 15px;
+
 }
 
 .form-group label {
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   color: #ffffff;
 }
 
 .form-group input {
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #444;
-  background: #2a2a2a;
-  color: #fff;
+  border: 1px solid #ccc;
   outline: none;
 }
 
 .form-group input:focus {
   border-color: #0d6efd;
-  box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
 }
 
 /* ===== QUESTIONS SECTION ===== */
 .question-box {
-  border: 1px solid #333;
+  border: 1px solid #ddd;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 8px;
   margin-bottom: 20px;
-  background: #2b2b2b;
-  transition: 0.2s ease;
-}
-
-.question-box:hover {
-  border-color: #0d6efd;
-  transform: translateY(-2px);
+  background: #3d3939;
 }
 
 /* Question header */
@@ -82,36 +73,31 @@
 
 .question-header h4 {
   margin: 0;
-  color: #fff;
 }
 
 /* Remove button */
 .remove-btn {
-  background: #dc3545;
+  background: red;
   color: white;
   border: none;
   padding: 6px 10px;
   border-radius: 5px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .remove-btn:hover {
-  background: #a71d2a;
+  background: darkred;
 }
 
 /* Question textarea */
 .question-box textarea {
   width: 100%;
-  min-height: 90px;
+  min-height: 80px;
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #444;
-  background: #1f1f1f;
-  color: #fff;
+  border: 1px solid #ccc;
   resize: vertical;
   margin-bottom: 10px;
-  outline: none;
 }
 
 /* Options grid */
@@ -125,10 +111,7 @@
 .options-grid input {
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #444;
-  background: #1f1f1f;
-  color: #fff;
-  outline: none;
+  border: 1px solid #ccc;
 }
 
 /* Correct answer */
@@ -141,15 +124,13 @@
 .correct-answer select {
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #444;
-  background: #1f1f1f;
-  color: #fff;
+  border: 1px solid #ccc;
 }
 
 /* ===== BUTTONS ===== */
 .add-btn {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background: #198754;
   color: white;
   border: none;
@@ -157,16 +138,15 @@
   cursor: pointer;
   margin-top: 10px;
   font-weight: bold;
-  transition: 0.2s;
 }
 
 .add-btn:hover {
-  background: #146c43;
+  background: #157347;
 }
 
 .submit-btn {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: #0d6efd;
   color: white;
   border: none;
@@ -175,8 +155,8 @@
   margin-top: 15px;
   font-size: 16px;
   font-weight: bold;
-  transition: 0.2s;
 }
+
 
 .submit-btn:hover {
   background: #0b5ed7;
@@ -190,9 +170,5 @@
 
   .exam-form {
     padding: 15px;
-  }
-
-  .admin-add-exam h2 {
-    font-size: 20px;
   }
 }

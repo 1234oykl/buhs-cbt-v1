@@ -1,7 +1,6 @@
 import { useState } from "react";
-import api from "../config/api";
+import api from "../config/api"; // IMPORTANT FIX
 import { useNavigate, Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
 
 function Login() {
@@ -37,8 +36,12 @@ function Login() {
         admissionNo,
       });
 
+      console.log("LOGIN SUCCESS:", res.data);
+
+      // Save user
       localStorage.setItem("user", JSON.stringify(res.data));
 
+      // ROUTING FIX
       if (res.data.isAdmin) {
         navigate("/admin");
       } else {
@@ -53,69 +56,43 @@ function Login() {
   };
 
   return (
-    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div className="row w-100 justify-content-center">
-        <div className="col-12 col-sm-10 col-md-6 col-lg-4">
-          <div className="card shadow-lg border-0 rounded-4">
-            <div className="card-body p-4">
-              <h2 className="text-center mb-4 fw-bold text-primary">
-                Student Login
-              </h2>
+    <div className="login-container">
+      <div className="login-card">
+        <h1 className="login-title">Student Login</h1>
 
-              {error && (
-                <div className="alert alert-danger py-2 text-center">
-                  {error}
-                </div>
-              )}
+        {error && <p className="error-message">{error}</p>}
 
-              <form onSubmit={handleSubmit}>
-                {/* CLASS */}
-                <div className="mb-3">
-                  <label className="form-label">Class</label>
-                  <input
-                    type="text"
-                    name="className"
-                    value={className}
-                    onChange={handleChange}
-                    className="form-control form-control-lg"
-                    placeholder="e.g SS1"
-                    required
-                  />
-                </div>
-
-                {/* ADMISSION NUMBER */}
-                <div className="mb-3">
-                  <label className="form-label">Admission Number</label>
-                  <input
-                    type="text"
-                    name="admissionNo"
-                    value={admissionNo}
-                    onChange={handleChange}
-                    className="form-control form-control-lg"
-                    placeholder="Enter Admission Number"
-                    required
-                  />
-                </div>
-
-                {/* BUTTON */}
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 btn-lg"
-                  disabled={loading}
-                >
-                  {loading ? "Logging in..." : "Login"}
-                </button>
-              </form>
-
-              <p className="text-center mt-3 mb-0">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-decoration-none">
-                  Register
-                </Link>
-              </p>
-            </div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Class</label>
+            <input
+              type="text"
+              name="className"
+              value={className}
+              onChange={handleChange}
+              placeholder="Enter Class (e.g SS1)"
+            />
           </div>
-        </div>
+
+          <div className="form-group">
+            <label>Admission Number</label>
+            <input
+              type="text"
+              name="admissionNo"
+              value={admissionNo}
+              onChange={handleChange}
+              placeholder="Enter Admission Number"
+            />
+          </div>
+
+          <button className="login-btn" type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Login"}
+          </button>
+        </form>
+
+        <p className="login-link">
+          Don't have an account? <Link to="/register">Register</Link>
+        </p>
       </div>
     </div>
   );

@@ -1,8 +1,6 @@
-
 import { useEffect, useState } from "react";
 import api from "../config/api";
 import { useParams, Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./Leaderboard.css";
 
 function Leaderboard() {
@@ -18,9 +16,11 @@ function Leaderboard() {
         setLoading(true);
         setError("");
 
-        const user = JSON.parse(localStorage.getItem("user"));
+        const user = JSON.parse(
+          localStorage.getItem("user")
+        );
 
-        if (!user?.token) {
+        if (!user || !user.token) {
           setError("Unauthorized access");
           setLoading(false);
           return;
@@ -37,7 +37,13 @@ function Leaderboard() {
 
         setData(res.data || []);
         setLoading(false);
+
       } catch (err) {
+        console.log(
+          "Leaderboard Error:",
+          err.response?.data || err.message
+        );
+
         setError("Failed to load leaderboard.");
         setLoading(false);
       }
@@ -54,37 +60,47 @@ function Leaderboard() {
   };
 
   return (
-    <div className="container py-4">
+    <div className="leaderboard-page">
 
       {/* HEADER */}
-      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div className="leaderboard-header">
+        <h2>🏆 Leaderboard</h2>
 
-        <h3 className="fw-bold">🏆 Leaderboard</h3>
-
-        <Link to="/student-dashboard" className="btn btn-outline-primary">
-          ⬅ Back
+        <Link
+          to="/student-dashboard"
+          className="back-btn"
+        >
+          ⬅ Back to Dashboard
         </Link>
-
       </div>
 
       {/* LOADING */}
-      {loading && <p>Loading leaderboard...</p>}
-
-      {/* ERROR */}
-      {error && <p className="text-danger">{error}</p>}
-
-      {/* EMPTY */}
-      {!loading && !error && data.length === 0 && (
-        <p>No leaderboard data yet.</p>
+      {loading && (
+        <p className="loading">
+          Loading leaderboard...
+        </p>
       )}
 
+      {/* ERROR */}
+      {error && (
+        <p className="error">{error}</p>
+      )}
+
+      {/* EMPTY STATE */}
+      {!loading &&
+        !error &&
+        data.length === 0 && (
+          <p className="empty">
+            No leaderboard data yet.
+          </p>
+        )}
+
       {/* TABLE */}
-      {!loading && !error && data.length > 0 && (
-        <div className="table-responsive">
-
-          <table className="table table-bordered table-hover">
-
-            <thead className="table-dark">
+      {!loading &&
+        !error &&
+        data.length > 0 && (
+          <table className="leaderboard-table">
+            <thead>
               <tr>
                 <th>Rank</th>
                 <th>Name</th>
@@ -97,25 +113,29 @@ function Leaderboard() {
             <tbody>
               {data.map((item, index) => (
                 <tr key={item._id}>
-                  <td>{getRankBadge(index)}</td>
-                  <td>{item.student?.name}</td>
-                  <td>{item.student?.className}</td>
-                  <td>
-                    {item.score} / {item.total}
+                  <td className="rank">
+                    {getRankBadge(index)}
                   </td>
-                  <td>{item.percentage ?? 0}%</td>
+                  <td>
+                    {item.student?.name}
+                  </td>
+                  <td>
+                    {item.student?.className}
+                  </td>
+                  <td>
+                    {item.score} /{" "}
+                    {item.total}
+                  </td>
+                  <td>
+                    {item.percentage ?? 0}%
+                  </td>
                 </tr>
               ))}
             </tbody>
-
           </table>
-
-        </div>
-      )}
-
+        )}
     </div>
   );
 }
 
 export default Leaderboard;
-

@@ -1,144 +1,176 @@
-
-/* =========================
-   FULL PAGE LAYOUT
-========================= */
-.home {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #050b1a, #0a1a2f);
-  color: white;
+* {
+  box-sizing: border-box;
 }
 
-/* =========================
-   TOP BANNER
-========================= */
-.top-banner {
+
+.home {
+  height: 100vh;
+  background: url("../assets/cbt-bg1.png") center/cover no-repeat;
+  padding-top: 48px;
   position: relative;
-  background: #0d47a1;
-  padding: 10px 0;
-  overflow: hidden;
+}
+
+.top-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+
   display: flex;
   align-items: center;
+
+  background: rgba(13, 110, 253, 0.55); /* stronger than before */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+
+  overflow: hidden;
+  z-index: 9999;
 }
 
-/* ticker animation */
+/* scrolling container */
 .ticker {
-  width: 100%;
+  flex: 1;
   overflow: hidden;
   white-space: nowrap;
 }
 
+/* moving text */
 .ticker-track {
   display: inline-block;
   padding-left: 100%;
-  animation: scroll 20s linear infinite;
-  font-weight: bold;
-  font-size: 14px;
+  animation: scroll-premium 22s linear infinite;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  color: #ffffff; /* force visible white */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); /* improves readability */
+
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
-@keyframes scroll {
+/* smooth scroll */
+@keyframes scroll-premium {
   0% {
-    transform: translateX(0);
+    transform: translateX(0%);
   }
   100% {
     transform: translateX(-100%);
   }
 }
 
-/* fade edges */
+/* hover pause */
+.top-banner:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+/* fade edges (premium touch) */
 .fade-left,
 .fade-right {
   position: absolute;
   top: 0;
-  bottom: 0;
-  width: 50px;
+  width: 80px;
+  height: 100%;
   z-index: 2;
+  pointer-events: none;
 }
 
 .fade-left {
   left: 0;
-  background: linear-gradient(to right, #0d47a1, transparent);
+  background: linear-gradient(to right, rgba(13,110,253,0.7), transparent);
 }
 
 .fade-right {
   right: 0;
-  background: linear-gradient(to left, #0d47a1, transparent);
+  background: linear-gradient(to left, rgba(13,110,253,0.7), transparent);
 }
 
-/* =========================
-   CENTER OVERLAY
-========================= */
 .overlay {
-  flex: 1;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 30px;
+  max-width: 700px;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
   text-align: center;
-  width: 100%;
-  max-width: 500px;
-  border: 1px solid rgba(255,255,255,0.15);
 }
 
-/* =========================
-   TITLE
-========================= */
 .card h1 {
-  font-size: 24px;
   margin-bottom: 10px;
+  font-size: 30px;
 }
 
 .card p {
-  color: #ccc;
-  margin-bottom: 20px;
+  font-size: 30px;
+  margin-bottom: 30px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
 .cta-btn {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
+  margin: 40px 5px 0 5px;
 
-  background: linear-gradient(90deg, #00d4ff, #0066ff);
+
   color: white;
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
 
-  font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
+
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.35);
+
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
+/* hover effect */
 .cta-btn:hover {
-  transform: scale(1.03);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(13, 110, 253, 0.5);
 }
 
-/* =========================
-   MOBILE RESPONSIVE
-========================= */
-@media (max-width: 768px) {
+/* click effect */
+.cta-btn:active {
+  transform: scale(0.97);
+}
 
-  .card {
-    padding: 20px;
-  }
+/* glowing animation */
+.cta-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: skewX(-25deg);
+}
 
-  .card h1 {
-    font-size: 20px;
-  }
+.cta-btn:hover::after {
+  animation: shine 0.7s forwards;
+}
 
-  .ticker-track {
-    font-size: 12px;
+@keyframes shine {
+  100% {
+    left: 120%;
   }
 }
+
+/* .card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+} */

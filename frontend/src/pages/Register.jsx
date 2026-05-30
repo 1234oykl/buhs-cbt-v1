@@ -1,8 +1,6 @@
-
 import { useState } from "react";
-import api from "../config/api";
+import api from "../config/api"; // IMPORTANT FIX
 import { useNavigate, Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./Register.css";
 
 function Register() {
@@ -19,144 +17,146 @@ function Register() {
 
   const { name, className, admissionNo } = formData;
 
+  // =========================
+  // HANDLE INPUT CHANGE
+  // =========================
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+
     setError("");
   };
 
+  // =========================
+  // HANDLE REGISTER
+  // =========================
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!name || !className || !admissionNo) {
-      setError("Please fill in all fields");
-      return;
-    }
+  if (!name || !className || !admissionNo) {
+    setError("Please fill in all fields");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      await api.post("/users/register", formData);
+    await api.post("/users/register", formData);
 
-      setLoading(false);
-      navigate("/login");
-    } catch (err) {
-      setLoading(false);
+    setLoading(false);
+    navigate("/login");
 
-      setError(
-        err.response?.data?.message || "Registration failed"
-      );
-    }
-  };
+  } catch (err) {
+    setLoading(false);
+
+    console.log("FULL ERROR:", err);
+
+    setError(
+      err.response?.data?.message ||
+      "Registration failed"
+    );
+  }
+};
 
   return (
-    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-dark register-container">
+    <div className="register-container">
 
-      <div className="row w-100 justify-content-center">
+      {/* REGISTER CARD */}
+      <div className="register-card">
 
-        <div className="col-12 col-sm-10 col-md-7 col-lg-5">
+        {/* SCHOOL BRAND */}
+        <div className="school-brand">
 
-          <div className="card shadow-lg border-0 rounded-4 register-card">
+          <p className="school-subtitle">
+            Student Registration Portal
+          </p>
+        </div>
 
-            <div className="card-body p-4">
+        {/* TITLE */}
+        <h1 className="register-title">
+          Create Student Account
+        </h1>
 
-              {/* HEADER */}
-              <div className="text-center mb-3">
-                <h2 className="fw-bold text-info">
-                  BUHS CBT Portal
-                </h2>
-                <p className="text-muted mb-0">
-                  Student Registration Portal
-                </p>
-              </div>
+        {/* ERROR */}
+        {error && (
+          <p className="error-message">
+            {error}
+          </p>
+        )}
 
-              <h4 className="text-center mb-3">
-                Create Student Account
-              </h4>
+        {/* FORM */}
+        <form
+          className="register-form"
+          onSubmit={handleSubmit}
+        >
 
-              {/* ERROR */}
-              {error && (
-                <div className="alert alert-danger text-center py-2">
-                  {error}
-                </div>
-              )}
+          {/* FULL NAME */}
+          <div className="form-group">
+            <label>Full Name</label>
 
-              {/* FORM */}
-              <form onSubmit={handleSubmit}>
-
-                {/* NAME */}
-                <div className="mb-3">
-                  <label className="form-label">Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={name}
-                    onChange={handleChange}
-                    className="form-control form-control-lg"
-                    placeholder="Enter Full Name"
-                    required
-                  />
-                </div>
-
-                {/* CLASS */}
-                <div className="mb-3">
-                  <label className="form-label">Class</label>
-                  <input
-                    type="text"
-                    name="className"
-                    value={className}
-                    onChange={handleChange}
-                    className="form-control form-control-lg"
-                    placeholder="e.g SS1A"
-                    required
-                  />
-                </div>
-
-                {/* ADMISSION NUMBER */}
-                <div className="mb-3">
-                  <label className="form-label">Admission Number</label>
-                  <input
-                    type="text"
-                    name="admissionNo"
-                    value={admissionNo}
-                    onChange={handleChange}
-                    className="form-control form-control-lg"
-                    placeholder="Enter Admission Number"
-                    required
-                  />
-                </div>
-
-                {/* BUTTON */}
-                <button
-                  type="submit"
-                  className="btn btn-success w-100 btn-lg"
-                  disabled={loading}
-                >
-                  {loading ? "Registering..." : "Register"}
-                </button>
-
-              </form>
-
-              {/* LOGIN LINK */}
-              <p className="text-center mt-3 mb-0">
-                Already have an account?{" "}
-                <Link to="/login" className="text-decoration-none">
-                  Login
-                </Link>
-              </p>
-
-            </div>
+            <input
+              type="text"
+              name="name"
+              value={name}
+              onChange={handleChange}
+              placeholder="Enter Full Name"
+            />
           </div>
 
-        </div>
-      </div>
+          {/* CLASS */}
+          <div className="form-group">
+            <label>Class</label>
 
+            <input
+              type="text"
+              name="className"
+              value={className}
+              onChange={handleChange}
+              placeholder="Enter Class (e.g SS1A)"
+            />
+          </div>
+
+          {/* ADMISSION NUMBER */}
+          <div className="form-group">
+            <label>Admission Number</label>
+
+            <input
+              type="text"
+              name="admissionNo"
+              value={admissionNo}
+              onChange={handleChange}
+              placeholder="Enter Admission Number"
+            />
+          </div>
+
+          {/* BUTTON */}
+          <button
+            className="register-btn"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="spinner"></span>
+            ) : (
+              "Register"
+            )}
+          </button>
+        </form>
+
+        {/* LOGIN LINK */}
+        <p className="register-link">
+          Already have an account?{" "}
+          <Link to="/login">
+            Login
+          </Link>
+        </p>
+
+      </div>
     </div>
   );
 }
 
 export default Register;
-
