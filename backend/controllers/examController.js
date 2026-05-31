@@ -79,12 +79,23 @@ const startExam = asyncHandler(async (req, res) => {
     throw new Error("Exam not found");
   }
 
-  // shuffle questions
-  const shuffledQuestions = [...exam.questions].sort(() => Math.random() - 0.5);
+  // shuffle WITHOUT exposing correct answers
+  const shuffledQuestions = exam.questions
+    .map((q) => ({
+      _id: q._id,
+      question: q.question,
+      options: q.options,
+      marks: q.marks || 1,
+    }))
+    .sort(() => Math.random() - 0.5);
 
   res.json({
-    exam,
-    shuffledQuestions,
+    examId: exam._id,
+    title: exam.title,
+    className: exam.className,
+    subject: exam.subject,
+    duration: exam.duration,
+    questions: shuffledQuestions,
   });
 });
 

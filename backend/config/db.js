@@ -1,13 +1,22 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI)
-    console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline)
-  } catch (error) {
-    console.error(`Error: ${error.message}`.red.underline)
-    process.exit(1)
-  }
-}
+    const MONGO_URI = process.env.MONGO_URI;
 
-module.exports = connectDB
+    console.log("MONGO URI EXISTS:", !!MONGO_URI);
+
+    if (!MONGO_URI) {
+      throw new Error("MONGO_URI is missing in environment variables");
+    }
+
+    const conn = await mongoose.connect(MONGO_URI);
+
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error("DB ERROR:", error.message);
+    process.exit(1);
+  }
+};
+
+module.exports = connectDB;

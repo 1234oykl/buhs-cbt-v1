@@ -1,39 +1,20 @@
 const asyncHandler = require("express-async-handler");
 const Result = require("../models/resultModel");
 const Exam = require("../models/examModel");
+const User = require("../models/userModel");
 
-// =========================
-// SUBMIT EXAM (AUTO SCORE + PREVENT RETAKE)
-// =========================
 const submitExam = asyncHandler(async (req, res) => {
-  const { student, exam, answers } = req.body;
+  console.log("🔥 SUBMIT ROUTE HIT");
 
-  const examData = await Exam.findById(exam);
-  const studentData = await User.findById(student);
+  const student = req.user._id;
+  const { exam, answers } = req.body;
 
-  if (examData.className !== studentData.className) {
-    return res.status(403).json({ message: "Invalid exam access" });
-  }
-
-  let score = 0;
-  let total = examData.questions.length;
-
-  const detailedResults = examData.questions.map((q, index) => {
-    const isCorrect = answers[index] === q.correctAnswer;
-
-    if (isCorrect) score += q.marks || 1;
-
-    return {
-      question: q.question,
-      selected: answers[index],
-      correct: q.correctAnswer,
-      isCorrect,
-    };
-  });
+  console.log("STUDENT:", student);
+  console.log("EXAM:", exam);
 
   const existing = await Result.findOne({
-    student: req.body.student,
-    exam: req.body.exam,
+    student,
+    exam,
   });
 
   if (existing) {
@@ -42,64 +23,104 @@ const submitExam = asyncHandler(async (req, res) => {
     });
   }
 
+  const examData = await Exam.findById(exam);
+
+  if (!examData) {
+    return res.status(404).json({
+      message: "Exam not found",
+    });
+  }
+
+  let score = 0;
+  let wrong = 0;
+
+  const detailedResults = examData.questions.map((q) => {
+    const selected = answers.find(
+      (a) => a.questionId === q._id.toString()
+    );
+
+    const isCorrect =
+      selected?.answer === q.correctAnswer;
+
+    if (isCorrect) {
+      score += q.marks || 1;
+    } else {
+      wrong++;
+    }
+
+    return {
+      questionId: q._id,
+      question: q.question,
+      selected: selected?.answer || null,
+      correct: q.correctAnswer,
+      isCorrect,
+    };
+  });
+
+  const total = examData.questions.length;
+
+  const percentage =
+    total > 0 ? Math.round((score / total) * 100) : 0;
+
+  console.log("ABOUT TO SAVE RESULT");
+
   const result = await Result.create({
     student,
     exam,
-    score,
-    total,
     answers: detailedResults,
+    score,
+    wrong,
+    total,
+    percentage,
   });
 
-  res.json({ message: "Submitted", score, total, result });
+  console.log("RESULT SAVED:", result._id);
+
+  res.status(200).json({
+    message: "Submitted successfully",
+    score,
+    total,
+    percentage,
+    result,
+  });
 });
 
+
 // =========================
-// GET ALL RESULTS (ADMIN)
+// GET ALL RESULTS
 // =========================
 const getResults = asyncHandler(async (req, res) => {
   const results = await Result.find()
     .populate("student", "name className admissionNo")
-    .populate("exam", "title duration");
+    .populate("exam", "title subject");
+  console.log("RESULTS FOUND:", results.length);
 
   res.json(results);
 });
 
 // =========================
-// LEADERBOARD BY EXAM
+// GET LEADERBOARD
 // =========================
 const getLeaderboard = asyncHandler(async (req, res) => {
-  const { examId } = req.params;
-
-  const results = await Result.find({ exam: examId })
+  const results = await Result.find({
+    exam: req.params.examId,
+  })
     .populate("student", "name className")
     .sort({ score: -1 });
 
-  const ranked = results.map((r, index) => {
-    const percentage = ((r.score / r.total) * 100).toFixed(1);
-
-    return {
-      _id: r._id,
-      rank: index + 1,
-      student: r.student,
-      score: r.score,
-      total: r.total,
-      percentage,
-    };
-  });
-
-  res.json(ranked);
+  res.json(results);
 });
 
-const getStudentResults = async (req, res) => {
-  try {
-    const results = await Result.find({ student: req.params.id }).populate(
-      "exam",
-    );
-    res.json(results);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch student results" });
-  }
-};
+// =========================
+// GET STUDENT RESULTS
+// =========================
+const getStudentResults = asyncHandler(async (req, res) => {
+  const results = await Result.find({
+    student: req.params.id,
+  }).populate("exam");
+
+  res.json(results);
+});
 
 module.exports = {
   submitExam,

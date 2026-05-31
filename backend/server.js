@@ -1,5 +1,7 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
-const dotenv = require("dotenv").config();
 const colors = require("colors");
 const connectDB = require("./config/db");
 const cors = require("cors");
@@ -67,6 +69,42 @@ app.use("/api/users", userRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/subjects", subjectRoutes);
+
+app.get("/test-result-save", async (req, res) => {
+  const Result = require("./models/resultModel");
+
+  try {
+    const test = await Result.create({
+      student: "665000000000000000000000",
+      exam: "665000000000000000000000",
+      score: 5,
+      total: 10,
+      answers: []
+    });
+
+    res.json({
+      message: "SAVE WORKS",
+      data: test
+    });
+
+  } catch (err) {
+    console.log("TEST SAVE ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+app.post("/debug-submit", (req, res) => {
+  console.log("🔥 DEBUG ROUTE HIT");
+  res.json({ ok: true });
+});
+
+
+app.post("/api/test-hit", (req, res) => {
+  console.log("🔥 HIT CONFIRMED");
+  res.json({ ok: true });
+});
+
 
 // ERROR HANDLER (LAST)
 app.use(errorHandler);

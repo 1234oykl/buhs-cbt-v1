@@ -15,8 +15,8 @@ const resultSchema = new mongoose.Schema(
     },
 
     answers: {
-      type: Object,
-      required: true,
+      type: Array,
+      default: [],
     },
 
     shuffledQuestions: {

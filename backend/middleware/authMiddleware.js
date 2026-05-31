@@ -40,7 +40,12 @@ const auth = async (req, res, next) => {
       });
     }
 
-    req.user = user;
+    req.user = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
 
     next();
   } catch (err) {

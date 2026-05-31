@@ -10,13 +10,11 @@ const {
 
 const auth = require("../middleware/authMiddleware");
 
+// 🔥 TEST ROUTE (safe)
 router.post("/submit", auth, submitExam);
+
 router.get("/", auth, getResults);
 router.get("/leaderboard/:examId", auth, getLeaderboard);
 router.get("/student/:id", auth, getStudentResults);
-router.post("/submit", auth, (req, res) => {
-  console.log("HEADERS:", req.headers);
-  res.send("ok");
-});
 
 module.exports = router;
