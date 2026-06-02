@@ -18,7 +18,6 @@ function ExamPage() {
   const [tabSwitches, setTabSwitches] = useState(0);
 
   const [attemptId, setAttemptId] = useState(null);
-
   const [answers, setAnswers] = useState([]);
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -41,22 +40,31 @@ function ExamPage() {
           "/exams/start",
           { examId: id },
           {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
 
         const data = res.data;
 
-        setTitle(data.title);
-        setDuration(data.duration);
-        setQuestions(data.shuffledQuestions || []);
-        setAttemptId(data.attemptId);
+        setTitle(data.title || "Exam");
+        setDuration(data.duration || 0);
+        setQuestions(data.shuffledQuestions || data.questions || []);
+        setAttemptId(data.attemptId || null);
 
-        setTimeLeft(data.duration * 60);
+        const savedTime = localStorage.getItem(`exam_time_${id}`);
+
+        if (savedTime) {
+          setTimeLeft(Number(savedTime));
+        } else {
+          setTimeLeft((data.duration || 0) * 60);
+        }
 
         setLoading(false);
       } catch (err) {
         console.log(err.response?.data || err.message);
+        alert(err.response?.data?.message || "Failed to load exam");
         setLoading(false);
       }
     };
@@ -64,25 +72,44 @@ function ExamPage() {
     if (token) fetchExam();
   }, [id, token]);
 
-  // ================= SAVE ANSWERS =================
+  // ================= ANSWER HANDLER =================
   const handleAnswer = (value) => {
-    const questionId = questions[current]._id;
+    const questionId = String(questions[current]._id);
 
     setAnswers((prev) => {
-      const filtered = prev.filter((a) => a.questionId !== questionId);
+      const filtered = prev.filter((a) => String(a.questionId) !== questionId);
 
       return [
         ...filtered,
-        { questionId, answer: value },
+        {
+          questionId,
+          answer: value,
+        },
       ];
     });
   };
+
+  // ================= GET ANSWER =================
+  const getSelectedAnswer = (id) =>
+    answers.find((a) => String(a.questionId) === String(id))?.answer;
 
   // ================= FORMAT TIME =================
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${String(secs).padStart(2, "0")}`;
+  };
+
+  // ================= PREPARE ANSWERS (IMPORTANT FIX) =================
+  const buildFinalAnswers = () => {
+    return questions.map((q) => {
+      const found = answers.find((a) => String(a.questionId) === String(q._id));
+
+      return {
+        questionId: String(q._id),
+        answer: found?.answer || null,
+      };
+    });
   };
 
   // ================= SUBMIT EXAM =================
@@ -98,7 +125,17 @@ function ExamPage() {
       setSubmitted(true);
 
       try {
-        await api.post(
+        const finalAnswers = buildFinalAnswers();
+
+        console.log("SUBMITTING:", {
+          exam: id,
+          answers: finalAnswers.length,
+          attemptId,
+        });
+
+        console.log("TOKEN BEING SENT:", token);
+
+        const response = await api.post(
           "/results/submit",
           {
             exam: id,
@@ -106,11 +143,20 @@ function ExamPage() {
             attemptId,
           },
           {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+            headers: {
+              Authorization: `Bearer ${
+                localStorage.getItem("user")
+                  ? JSON.parse(localStorage.getItem("user")).token
+                  : ""
+              }`,
+            },
+          },
         );
 
-        localStorage.removeItem(`exam_${id}_answers`);
+        console.log("TOKEN:", token);
+
+        console.log("SUBMIT RESPONSE:", response.data);
+
         localStorage.removeItem(`exam_time_${id}`);
 
         alert("Submitted successfully");
@@ -121,7 +167,7 @@ function ExamPage() {
         setSubmitted(false);
       }
     },
-    [answers, id, attemptId, navigate, submitted, token]
+    [answers, attemptId, id, navigate, submitted, token, questions],
   );
 
   // ================= TIMER =================
@@ -144,13 +190,7 @@ function ExamPage() {
     return () => clearInterval(timer);
   }, [timeLeft, submitted, questions.length, submitExam, id]);
 
-  // ================= RESTORE TIMER =================
-  useEffect(() => {
-    const saved = localStorage.getItem(`exam_time_${id}`);
-    if (saved) setTimeLeft(Number(saved));
-  }, [id]);
-
-  // ================= ANTI CHEAT =================
+  // ================= TAB SWITCH DETECTION =================
   useEffect(() => {
     const handleBlur = () => {
       if (submitted) return;
@@ -192,9 +232,6 @@ function ExamPage() {
   if (!questions.length) return <h2>No questions found</h2>;
 
   const question = questions[current];
-
-  const getSelectedAnswer = (id) =>
-    answers.find((a) => a.questionId === id)?.answer;
 
   return (
     <div className="cbt-wrapper">
@@ -256,7 +293,12 @@ function ExamPage() {
             Answered: {answers.length} / {questions.length}
           </p>
 
-          <button onClick={() => submitExam(false)}>
+          <button
+            onClick={() => {
+              console.log("MANUAL SUBMIT CLICKED");
+              submitExam(false);
+            }}
+          >
             Submit Exam
           </button>
         </div>
@@ -264,7 +306,10 @@ function ExamPage() {
 
       {/* FOOTER */}
       <div className="cbt-footer">
-        <button disabled={current === 0} onClick={() => setCurrent(current - 1)}>
+        <button
+          disabled={current === 0}
+          onClick={() => setCurrent(current - 1)}
+        >
           Previous
         </button>
 

@@ -24,12 +24,15 @@ const startExam = async (req, res) => {
 
   // REUSE IN-PROGRESS
   if (attempt && attempt.status === "in-progress") {
-    return res.json({
-      attemptId: attempt._id,
-      shuffledQuestions: attempt.shuffledQuestions,
-      status: attempt.status,
-    });
-  }
+  return res.json({
+    attemptId: attempt._id,
+    examId: exam._id,
+    title: exam.title,
+    duration: exam.duration,
+    shuffledQuestions: attempt.shuffledQuestions,
+    status: attempt.status,
+  });
+}
 
   // CREATE NEW ATTEMPT
   const shuffled = exam.questions

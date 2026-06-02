@@ -1,20 +1,53 @@
 const asyncHandler = require("express-async-handler");
+const mongoose = require("mongoose");
+
 const Result = require("../models/resultModel");
 const Exam = require("../models/examModel");
 const User = require("../models/userModel");
 
-const submitExam = asyncHandler(async (req, res) => {
-  console.log("🔥 SUBMIT ROUTE HIT");
+// =========================
+// SUBMIT EXAM
+// =========================
 
-  const student = req.user._id;
+
+
+const submitExam = asyncHandler(async (req, res) => {
+  console.log("========== SUBMIT ==========");
+  console.log("REQ.USER:", req.user);
+  console.log("BODY:", req.body);
+  console.log("BODY:", req.body);
+
+  // 1. AUTH CHECK FIRST (MUST BE FIRST)
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      message: "Auth failed - user not found",
+    });
+  }
+
+  const student = req.user.id;
   const { exam, answers } = req.body;
+
+  // 2. VALIDATION
+
+  if (!student) {
+    return res.status(401).json({
+      message: "Student not found in request",
+    });
+  }
+
+  if (!exam || !Array.isArray(answers)) {
+    return res.status(400).json({
+      message: "Exam or answers missing/invalid",
+    });
+  }
 
   console.log("STUDENT:", student);
   console.log("EXAM:", exam);
 
+  // 3. CHECK DUPLICATE
   const existing = await Result.findOne({
-    student,
-    exam,
+    student: new mongoose.Types.ObjectId(student),
+    exam: new mongoose.Types.ObjectId(exam),
   });
 
   if (existing) {
@@ -23,6 +56,7 @@ const submitExam = asyncHandler(async (req, res) => {
     });
   }
 
+  // 4. GET EXAM
   const examData = await Exam.findById(exam);
 
   if (!examData) {
@@ -31,60 +65,75 @@ const submitExam = asyncHandler(async (req, res) => {
     });
   }
 
+  // 5. SCORING
   let score = 0;
   let wrong = 0;
 
   const detailedResults = examData.questions.map((q) => {
     const selected = answers.find(
-      (a) => a.questionId === q._id.toString()
+      (a) => String(a.questionId) === String(q._id),
     );
 
     const isCorrect =
-      selected?.answer === q.correctAnswer;
+      selected && String(selected.answer) === String(q.correctAnswer);
 
-    if (isCorrect) {
-      score += q.marks || 1;
-    } else {
-      wrong++;
-    }
+    if (isCorrect) score += q.marks || 1;
+    else wrong++;
 
     return {
       questionId: q._id,
       question: q.question,
       selected: selected?.answer || null,
       correct: q.correctAnswer,
-      isCorrect,
+      isCorrect: !!isCorrect,
     };
   });
 
-  const total = examData.questions.length;
+  const totalQuestions = examData.questions.length;
+
+  const totalMarks = examData.questions.reduce(
+    (acc, q) => acc + (q.marks || 1),
+    0,
+  );
 
   const percentage =
-    total > 0 ? Math.round((score / total) * 100) : 0;
+    totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
 
-  console.log("ABOUT TO SAVE RESULT");
-
+  // 6. SAVE RESULT
+  try {
   const result = await Result.create({
     student,
     exam,
     answers: detailedResults,
     score,
     wrong,
-    total,
+    total: totalQuestions,
     percentage,
   });
 
   console.log("RESULT SAVED:", result._id);
 
-  res.status(200).json({
+  res.status(201).json({
+    message: "Submitted successfully",
+    result,
+  });
+} catch (err) {
+  console.log("SAVE ERROR:", err);
+  res.status(500).json({
+    message: err.message,
+  });
+}
+
+  console.log("RESULT SAVED:", result._id);
+
+  res.status(201).json({
     message: "Submitted successfully",
     score,
-    total,
+    total: totalQuestions,
     percentage,
     result,
   });
 });
-
 
 // =========================
 // GET ALL RESULTS
@@ -93,7 +142,8 @@ const getResults = asyncHandler(async (req, res) => {
   const results = await Result.find()
     .populate("student", "name className admissionNo")
     .populate("exam", "title subject");
-  console.log("RESULTS FOUND:", results.length);
+
+  console.log("TOTAL RESULTS:", results.length);
 
   res.json(results);
 });
@@ -102,10 +152,8 @@ const getResults = asyncHandler(async (req, res) => {
 // GET LEADERBOARD
 // =========================
 const getLeaderboard = asyncHandler(async (req, res) => {
-  const results = await Result.find({
-    exam: req.params.examId,
-  })
-    .populate("student", "name className")
+  const results = await Result.find({ exam: req.params.examId })
+    .populate("student", "name className admissionNo")
     .sort({ score: -1 });
 
   res.json(results);
@@ -115,9 +163,10 @@ const getLeaderboard = asyncHandler(async (req, res) => {
 // GET STUDENT RESULTS
 // =========================
 const getStudentResults = asyncHandler(async (req, res) => {
-  const results = await Result.find({
-    student: req.params.id,
-  }).populate("exam");
+  const results = await Result.find({ student: req.params.id }).populate(
+    "exam",
+    "title subject",
+  );
 
   res.json(results);
 });
