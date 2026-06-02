@@ -9,22 +9,16 @@ const User = require("../models/userModel");
 // SUBMIT EXAM
 // =========================
 
-
-
 const submitExam = asyncHandler(async (req, res) => {
   console.log("========== SUBMIT ==========");
+  console.log("🔥 SUBMIT ROUTE HIT");
   console.log("REQ.USER:", req.user);
-  console.log("BODY:", req.body);
+  console.log("AUTH HEADER:", req.headers.authorization);
   console.log("BODY:", req.body);
 
-  // 1. AUTH CHECK FIRST (MUST BE FIRST)
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      message: "Auth failed - user not found",
-    });
-  }
+  console.log("DB:", mongoose.connection.name);
 
-  const student = req.user.id;
+  const student = req.user?.id || req.user?._id;
   const { exam, answers } = req.body;
 
   // 2. VALIDATION
@@ -101,28 +95,28 @@ const submitExam = asyncHandler(async (req, res) => {
 
   // 6. SAVE RESULT
   try {
-  const result = await Result.create({
-    student,
-    exam,
-    answers: detailedResults,
-    score,
-    wrong,
-    total: totalQuestions,
-    percentage,
-  });
+    const result = await Result.create({
+      student,
+      exam,
+      answers: detailedResults,
+      score,
+      wrong,
+      total: totalQuestions,
+      percentage,
+    });
 
-  console.log("RESULT SAVED:", result._id);
+    console.log("RESULT SAVED:", result._id);
 
-  res.status(201).json({
-    message: "Submitted successfully",
-    result,
-  });
-} catch (err) {
-  console.log("SAVE ERROR:", err);
-  res.status(500).json({
-    message: err.message,
-  });
-}
+    res.status(201).json({
+      message: "Submitted successfully",
+      result,
+    });
+  } catch (err) {
+    console.log("SAVE ERROR:", err);
+    res.status(500).json({
+      message: err.message,
+    });
+  }
 
   console.log("RESULT SAVED:", result._id);
 

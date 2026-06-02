@@ -28,10 +28,7 @@ const auth = async (req, res, next) => {
     console.log("TOKEN RECEIVED:", token);
 
     // Verify JWT
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     console.log("DECODED TOKEN:", decoded);
 
@@ -42,13 +39,9 @@ const auth = async (req, res, next) => {
     }
 
     // Find user
-    const user = await User.findById(decoded.id)
-      .select("-password");
+    const user = await User.findById(decoded.id).select("-password");
 
-    console.log(
-      "USER FOUND:",
-      user ? user._id : "NULL"
-    );
+    console.log("USER FOUND:", user ? user._id : "NULL");
 
     if (!user) {
       return res.status(401).json({
@@ -64,8 +57,11 @@ const auth = async (req, res, next) => {
       isAdmin: user.isAdmin,
     };
 
+    console.log("========== AUTH ==========");
+    console.log("AUTH SUCCESS");
     console.log("REQ.USER SET:", req.user);
-    console.log("=================================");
+
+    next();
 
     next();
   } catch (err) {
