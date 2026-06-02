@@ -12,6 +12,7 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 const resultRoutes = require("./routes/resultRoutes");
 const examRoutes = require("./routes/examRoutes");
+console.log("EXAM ROUTES LOADED:", typeof examRoutes);
 const userRoutes = require("./routes/userRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
 
