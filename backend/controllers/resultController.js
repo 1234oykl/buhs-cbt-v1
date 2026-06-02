@@ -10,91 +10,79 @@ const User = require("../models/userModel");
 // =========================
 
 const submitExam = asyncHandler(async (req, res) => {
-  console.log("========== SUBMIT ==========");
-  console.log("🔥 SUBMIT ROUTE HIT");
-  console.log("REQ.USER:", req.user);
-  console.log("AUTH HEADER:", req.headers.authorization);
-  console.log("BODY:", req.body);
+  try {
+    console.log("========== SUBMIT ==========");
+    console.log("🔥 SUBMIT ROUTE HIT");
+    console.log("REQ.USER:", req.user);
+    console.log("BODY:", req.body);
 
-  console.log("DB:", mongoose.connection.name);
+    const student = req.user?.id || req.user?._id;
+    const { exam, answers } = req.body;
 
-  const student = req.user?.id || req.user?._id;
-  const { exam, answers } = req.body;
+    if (!student) {
+      return res.status(401).json({
+        message: "Student not found in request",
+      });
+    }
 
-  // 2. VALIDATION
+    if (!exam || !Array.isArray(answers)) {
+      return res.status(400).json({
+        message: "Exam or answers missing/invalid",
+      });
+    }
 
-  if (!student) {
-    return res.status(401).json({
-      message: "Student not found in request",
+    const existing = await Result.findOne({
+      student: new mongoose.Types.ObjectId(student),
+      exam: new mongoose.Types.ObjectId(exam),
     });
-  }
 
-  if (!exam || !Array.isArray(answers)) {
-    return res.status(400).json({
-      message: "Exam or answers missing/invalid",
+    if (existing) {
+      return res.status(400).json({
+        message: "You have already taken this exam",
+      });
+    }
+
+    const examData = await Exam.findById(exam);
+
+    if (!examData) {
+      return res.status(404).json({
+        message: "Exam not found",
+      });
+    }
+
+    let score = 0;
+    let wrong = 0;
+
+    const detailedResults = examData.questions.map((q) => {
+      const selected = answers.find(
+        (a) => String(a.questionId) === String(q._id),
+      );
+
+      const isCorrect =
+        selected && String(selected.answer) === String(q.correctAnswer);
+
+      if (isCorrect) score += q.marks || 1;
+      else wrong++;
+
+      return {
+        questionId: q._id,
+        question: q.question,
+        selected: selected?.answer || null,
+        correct: q.correctAnswer,
+        isCorrect: !!isCorrect,
+      };
     });
-  }
 
-  console.log("STUDENT:", student);
-  console.log("EXAM:", exam);
+    const totalQuestions = examData.questions.length;
 
-  // 3. CHECK DUPLICATE
-  const existing = await Result.findOne({
-    student: new mongoose.Types.ObjectId(student),
-    exam: new mongoose.Types.ObjectId(exam),
-  });
-
-  if (existing) {
-    return res.status(400).json({
-      message: "You have already taken this exam",
-    });
-  }
-
-  // 4. GET EXAM
-  const examData = await Exam.findById(exam);
-
-  if (!examData) {
-    return res.status(404).json({
-      message: "Exam not found",
-    });
-  }
-
-  // 5. SCORING
-  let score = 0;
-  let wrong = 0;
-
-  const detailedResults = examData.questions.map((q) => {
-    const selected = answers.find(
-      (a) => String(a.questionId) === String(q._id),
+    const totalMarks = examData.questions.reduce(
+      (acc, q) => acc + (q.marks || 1),
+      0,
     );
 
-    const isCorrect =
-      selected && String(selected.answer) === String(q.correctAnswer);
+    const percentage =
+      totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
 
-    if (isCorrect) score += q.marks || 1;
-    else wrong++;
-
-    return {
-      questionId: q._id,
-      question: q.question,
-      selected: selected?.answer || null,
-      correct: q.correctAnswer,
-      isCorrect: !!isCorrect,
-    };
-  });
-
-  const totalQuestions = examData.questions.length;
-
-  const totalMarks = examData.questions.reduce(
-    (acc, q) => acc + (q.marks || 1),
-    0,
-  );
-
-  const percentage =
-    totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
-
-  // 6. SAVE RESULT
-  try {
     const result = await Result.create({
       student,
       exam,
@@ -107,26 +95,20 @@ const submitExam = asyncHandler(async (req, res) => {
 
     console.log("RESULT SAVED:", result._id);
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Submitted successfully",
       result,
+      score,
+      total: totalQuestions,
+      percentage,
     });
   } catch (err) {
-    console.log("SAVE ERROR:", err);
-    res.status(500).json({
-      message: err.message,
+    console.log("SUBMIT ERROR:", err);
+
+    return res.status(500).json({
+      message: err.message || "Internal server error",
     });
   }
-
-  console.log("RESULT SAVED:", result._id);
-
-  res.status(201).json({
-    message: "Submitted successfully",
-    score,
-    total: totalQuestions,
-    percentage,
-    result,
-  });
 });
 
 // =========================
