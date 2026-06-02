@@ -45,8 +45,8 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: false
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -83,6 +83,12 @@ app.get("/test-result-save", async (req, res) => {
     console.log("TEST SAVE ERROR:", err);
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get("/api/test-server", (req, res) => {
+  res.json({
+    message: "NEW SERVER FILE IS RUNNING"
+  });
 });
 
 

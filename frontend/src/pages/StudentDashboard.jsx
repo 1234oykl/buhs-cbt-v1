@@ -15,17 +15,20 @@ function StudentDashboard() {
 
   const [search, setSearch] = useState("");
 
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
 
-  // Logout
+  // =========================
+  // LOGOUT
+  // =========================
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login");
   };
 
-  // Fetch dashboard data
+  // =========================
+  // FETCH DASHBOARD
+  // =========================
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -40,18 +43,19 @@ function StudentDashboard() {
 
         setStudent(user);
 
-        const config = {
+        const examsRes = await api.get("/exams", {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
-        };
-
-        // ✅ FIX: get ALL exams, backend should filter by class
-        const examsRes = await api.get("/exams", config);
+        });
 
         const resultsRes = await api.get(
-          `/results/student/${user._id}`,
-          config,
+          `/results/student/${user.id || user._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          },
         );
 
         setExams(examsRes.data || []);
@@ -59,8 +63,16 @@ function StudentDashboard() {
 
         setLoading(false);
       } catch (err) {
-        console.log(err.response?.data || err.message);
-        setError("Failed to load dashboard");
+        console.log("DASHBOARD ERROR:", err);
+        console.log("RESPONSE:", err.response);
+        console.log("DATA:", err.response?.data);
+
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to load dashboard",
+        );
+
         setLoading(false);
       }
     };
@@ -68,20 +80,24 @@ function StudentDashboard() {
     fetchDashboard();
   }, [navigate]);
 
-  // Check if exam is completed
+  // =========================
+  // CHECK COMPLETED EXAM
+  // =========================
   const isExamCompleted = (examId) => {
     return results.some((r) => r.exam?._id === examId || r.exam === examId);
   };
 
-  // Filter exams (search + class match)
+  // =========================
+  // FILTER EXAMS
+  // =========================
   const filteredExams = exams.filter((e) => {
     const searchMatch =
       (e.title || "").toLowerCase().includes(search.toLowerCase()) ||
       (e.subject || "").toLowerCase().includes(search.toLowerCase());
 
     const classMatch =
-      student?.className &&
       e.className &&
+      student?.className &&
       student.className
         .trim()
         .toUpperCase()
@@ -90,13 +106,17 @@ function StudentDashboard() {
     return searchMatch && classMatch;
   });
 
-  // Open modal
+  // =========================
+  // OPEN EXAM MODAL
+  // =========================
   const openInstructions = (exam) => {
     setSelectedExam(exam);
     setShowModal(true);
   };
 
-  // Start exam
+  // =========================
+  // START EXAM
+  // =========================
   const startExam = () => {
     if (!selectedExam) return;
 
@@ -219,6 +239,7 @@ function StudentDashboard() {
               <li>Ensure stable internet connection.</li>
               <li>No retake after submission.</li>
             </ul>
+
             <div className="modal-action">
               <button className="confirm-btn" onClick={startExam}>
                 Start Now

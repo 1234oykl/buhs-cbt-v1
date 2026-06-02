@@ -18,6 +18,11 @@ const createExam = asyncHandler(async (req, res) => {
     throw new Error("Questions are required");
   }
 
+  const exams = await Exam.find({
+    className: req.user.className, // if stored in token/user
+    isActive: true,
+  });
+
   const existing = await Exam.findOne({ title });
 
   if (existing) {

@@ -4,10 +4,7 @@ const examSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
 
-    className: {
-      type: String,
-      required: true,
-    },
+    className: { type: String, required: true, index: true },
 
     // ✅ ADD SUBJECT
     subject: { type: String, required: true },
