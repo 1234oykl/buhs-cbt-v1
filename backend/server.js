@@ -11,12 +11,6 @@ const mongoose = require("mongoose");
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 
-router.get("/test", (req, res) => {
-  res.json({
-    success: true,
-    message: "Result routes working",
-  });
-});
 
 const resultRoutes = require("./routes/resultRoutes");
 console.log("RESULT ROUTES LOADED");

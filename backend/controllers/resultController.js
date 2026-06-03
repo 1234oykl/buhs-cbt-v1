@@ -81,16 +81,17 @@ const submitExam = asyncHandler(async (req, res) => {
     const result = await Result.create({
       student,
       exam,
-      className: examDoc.className, // ✅ FIXED
-      subject: examDoc.subject, // ✅ FIXED
-      answers: detailedResults,
+      examTitle: examDoc.title,
+      className: examDoc.className,
+      subject: examDoc.subject,
       score,
       wrong,
       total: totalQuestions,
       percentage: Math.round((score / totalQuestions) * 100),
     });
-
+  
     console.log("RESULT SAVED:", result._id);
+    x;
 
     return res.status(201).json({
       message: "Submitted successfully",

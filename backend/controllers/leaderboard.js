@@ -5,7 +5,7 @@ const getLeaderboard = async (req, res) => {
   try {
     const leaderboard = await Result.find()
       .populate("student", "name className admissionNo")
-      .populate("exam", "title")
+      .populate("exam", "title subject className") // ✅ FIX HERE
       .sort({ percentage: -1 });
 
     res.json(leaderboard);

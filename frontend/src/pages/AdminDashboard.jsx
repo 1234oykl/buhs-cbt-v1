@@ -63,14 +63,14 @@ function AdminDashboard() {
           "/results/analytics/subjects",
           config,
         );
+        console.log("ANALYTICS RESPONSE:", analyticsRes.data);
         console.log("ANALYTICS DATA:", analyticsRes.data);
-
-        setAnalytics(analyticsRes.data || []);
 
         // SET STATES
         setResults(resultsRes.data || []);
         setExams(examsRes.data || []);
-        setLeaders(leaderboardRes.data || []);
+        setAnalytics(analyticsRes.data.data || analyticsRes.data || []);
+        setLeaders(leaderboardRes.data.data || leaderboardRes.data || []);
 
         // FILTER ONLY STUDENTS
         const onlyStudents = usersRes.data.filter((user) => !user.isAdmin);
@@ -155,11 +155,12 @@ function AdminDashboard() {
           <h2>🏆 Top 10 Students</h2>
 
           <div className="leaderboard">
-            {leaders.map((l, i) => (
-              <p key={l._id}>
-                #{i + 1} {l.student?.name} - {l.score}
-              </p>
-            ))}
+            {Array.isArray(leaders) &&
+              leaders.map((l, i) => (
+                <p key={l._id}>
+                  #{i + 1} {l.student?.name} - {l.score}
+                </p>
+              ))}
           </div>
 
           <div className="card">
@@ -188,11 +189,12 @@ function AdminDashboard() {
                 <p>No analytics data</p>
               ) : (
                 <div className="analytics-box">
-                  {analytics.map((a) => (
-                    <p key={a.subject}>
-                      {a.subject}: {a.average.toFixed(1)}
-                    </p>
-                  ))}
+                  {Array.isArray(analytics) &&
+                    analytics.map((a) => (
+                      <p key={a.subject}>
+                        {a.subject}: {a.average.toFixed(1)}
+                      </p>
+                    ))}
                 </div>
               )}
             </>
@@ -248,21 +250,26 @@ function AdminDashboard() {
                         </thead>
 
                         <tbody>
-                          {filteredResults.map((result) => (
-                            <tr key={result._id}>
-                              <td>{result.student?.name}</td>
-                              <td>{result.exam?.title}</td>
+                          {filteredResults.map((result) => {
+                            console.log("RESULT ROW:", result);
 
-                              {/* 👇 ADD THESE TWO */}
-                              <td>
-                                {result.exam?.className || result.className}
-                              </td>
+                            return (
+                              <tr key={result._id}>
+                                <td>{result.student?.name}</td>
+                                <td>{result.exam?.title}</td>
 
-                              <td>{result.exam?.subject || result.subject}</td>
+                                <td>
+                                  {result.exam?.className || result.className}
+                                </td>
 
-                              <td>{result.score}</td>
-                            </tr>
-                          ))}
+                                <td>
+                                  {result.exam?.subject || result.subject}
+                                </td>
+
+                                <td>{result.score}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -284,6 +291,8 @@ function AdminDashboard() {
                           <tr>
                             <th>Student</th>
                             <th>Exam</th>
+                            <th>Class</th>
+                            <th>Subject</th>
                             <th>Score</th>
                           </tr>
                         </thead>
@@ -293,6 +302,16 @@ function AdminDashboard() {
                             <tr key={result._id}>
                               <td>{result.student?.name}</td>
                               <td>{result.exam?.title}</td>
+                              <td>
+                                {result.className ||
+                                  result.exam?.className ||
+                                  "N/A"}
+                              </td>
+                              <td>
+                                {result.subject ||
+                                  result.exam?.subject ||
+                                  "N/A"}
+                              </td>
                               <td>{result.score}</td>
                             </tr>
                           ))}
