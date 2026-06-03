@@ -151,14 +151,14 @@ function StudentDashboard() {
       </div>
 
       {/* SEARCH */}
-      <div className="search-box">
+      {/* <div className="search-box">
         <input
           type="text"
           placeholder="Search exam..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-      </div>
+      </div> */}
 
       <h2 className="section-title">Available Exams</h2>
 

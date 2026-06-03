@@ -4,7 +4,6 @@ const api = axios.create({
   baseURL: "https://buhs-cbt-v1.onrender.com/api",
 });
 
-// AUTO ATTACH TOKEN
 api.interceptors.request.use((config) => {
   const user = JSON.parse(localStorage.getItem("user"));
 

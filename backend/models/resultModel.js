@@ -12,7 +12,7 @@ const answerSchema = new mongoose.Schema(
     correct: String,
     isCorrect: Boolean,
   },
-  { _id: false }
+  { _id: false },
 );
 
 const resultSchema = new mongoose.Schema(
@@ -23,6 +23,10 @@ const resultSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+
+    className: { type: String },
+
+    subject: { type: String },
 
     exam: {
       type: mongoose.Schema.Types.ObjectId,
@@ -56,7 +60,7 @@ const resultSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // 🔥 PREVENT DUPLICATE EXAM SUBMISSION (VERY IMPORTANT)

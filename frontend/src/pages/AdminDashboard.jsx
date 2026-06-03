@@ -14,6 +14,12 @@ function AdminDashboard() {
 
   const [loading, setLoading] = useState(true);
 
+  const [classFilter, setClassFilter] = useState("ALL");
+
+  const [analytics, setAnalytics] = useState([]);
+
+  const [leaders, setLeaders] = useState([]);
+
   // CHECK ADMIN LOGIN
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -45,15 +51,26 @@ function AdminDashboard() {
         // FETCH RESULTS
         const resultsRes = await api.get("/results", config);
 
+        const leaderboardRes = await api.get("/results/leaderboard", config);
+
         // FETCH EXAMS
         const examsRes = await api.get("/exams", config);
 
         // FETCH USERS
         const usersRes = await api.get("/users/all", config);
 
+        const analyticsRes = await api.get(
+          "/results/analytics/subjects",
+          config,
+        );
+        console.log("ANALYTICS DATA:", analyticsRes.data);
+
+        setAnalytics(analyticsRes.data || []);
+
         // SET STATES
         setResults(resultsRes.data || []);
         setExams(examsRes.data || []);
+        setLeaders(leaderboardRes.data || []);
 
         // FILTER ONLY STUDENTS
         const onlyStudents = usersRes.data.filter((user) => !user.isAdmin);
@@ -79,6 +96,11 @@ function AdminDashboard() {
     localStorage.removeItem("user");
     navigate("/admin-login");
   };
+
+  const filteredResults =
+    classFilter === "ALL"
+      ? results
+      : results.filter((r) => r.exam?.className === classFilter);
 
   return (
     <div className="admin-dashboard">
@@ -107,6 +129,13 @@ function AdminDashboard() {
           >
             Students
           </li>
+
+          <li
+            className={activeTab === "analytics" ? "active" : ""}
+            onClick={() => setActiveTab("analytics")}
+          >
+            Analytics
+          </li>
         </ul>
       </div>
 
@@ -123,6 +152,16 @@ function AdminDashboard() {
 
         {/* STATS */}
         <div className="stats-cards">
+          <h2>🏆 Top 10 Students</h2>
+
+          <div className="leaderboard">
+            {leaders.map((l, i) => (
+              <p key={l._id}>
+                #{i + 1} {l.student?.name} - {l.score}
+              </p>
+            ))}
+          </div>
+
           <div className="card">
             <h3>Total Students</h3>
             <p>{students.length}</p>
@@ -141,6 +180,24 @@ function AdminDashboard() {
 
         {/* CONTENT */}
         <div className="content-box">
+          {activeTab === "analytics" && (
+            <>
+              <h2>Subject Performance</h2>
+
+              {analytics.length === 0 ? (
+                <p>No analytics data</p>
+              ) : (
+                <div className="analytics-box">
+                  {analytics.map((a) => (
+                    <p key={a.subject}>
+                      {a.subject}: {a.average.toFixed(1)}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
           {loading ? (
             <p>Loading data...</p>
           ) : (
@@ -170,21 +227,40 @@ function AdminDashboard() {
                     <p>No exams available</p>
                   ) : (
                     <div className="table-wrapper">
+                      <select onChange={(e) => setClassFilter(e.target.value)}>
+                        <option value="ALL">All Classes</option>
+                        <option value="JS1">JS1</option>
+                        <option value="JS2">JS2</option>
+                        <option value="JS3">JS3</option>
+                        <option value="SS1">SS1</option>
+                        <option value="SS2">SS2</option>
+                        <option value="SS3">SS3</option>
+                      </select>
                       <table className="data-table">
                         <thead>
                           <tr>
-                            <th>Title</th>
-                            <th>Duration</th>
-                            <th>Questions</th>
+                            <th>Student</th>
+                            <th>Exam</th>
+                            <th>Class</th>
+                            <th>Subject</th>
+                            <th>Score</th>
                           </tr>
                         </thead>
 
                         <tbody>
-                          {exams.map((exam) => (
-                            <tr key={exam._id}>
-                              <td>{exam.title}</td>
-                              <td>{exam.duration} mins</td>
-                              <td>{exam.questions?.length || 0}</td>
+                          {filteredResults.map((result) => (
+                            <tr key={result._id}>
+                              <td>{result.student?.name}</td>
+                              <td>{result.exam?.title}</td>
+
+                              {/* 👇 ADD THESE TWO */}
+                              <td>
+                                {result.exam?.className || result.className}
+                              </td>
+
+                              <td>{result.exam?.subject || result.subject}</td>
+
+                              <td>{result.score}</td>
                             </tr>
                           ))}
                         </tbody>

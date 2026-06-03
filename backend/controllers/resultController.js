@@ -20,20 +20,18 @@ const submitExam = asyncHandler(async (req, res) => {
     const { exam, answers } = req.body;
 
     if (!student) {
-      return res.status(401).json({
-        message: "Student not found in request",
-      });
+      return res.status(401).json({ message: "Student not found in request" });
     }
 
     if (!exam || !Array.isArray(answers)) {
-      return res.status(400).json({
-        message: "Exam or answers missing/invalid",
-      });
+      return res
+        .status(400)
+        .json({ message: "Exam or answers missing/invalid" });
     }
 
     const existing = await Result.findOne({
-      student: new mongoose.Types.ObjectId(student),
-      exam: new mongoose.Types.ObjectId(exam),
+      student,
+      exam,
     });
 
     if (existing) {
@@ -45,9 +43,7 @@ const submitExam = asyncHandler(async (req, res) => {
     const examData = await Exam.findById(exam);
 
     if (!examData) {
-      return res.status(404).json({
-        message: "Exam not found",
-      });
+      return res.status(404).json({ message: "Exam not found" });
     }
 
     let score = 0;
@@ -59,7 +55,8 @@ const submitExam = asyncHandler(async (req, res) => {
       );
 
       const isCorrect =
-        selected && String(selected.answer) === String(q.correctAnswer);
+        selected &&
+        String(selected.answer).trim() === String(q.correctAnswer).trim();
 
       if (isCorrect) score += q.marks || 1;
       else wrong++;
@@ -75,22 +72,22 @@ const submitExam = asyncHandler(async (req, res) => {
 
     const totalQuestions = examData.questions.length;
 
-    const totalMarks = examData.questions.reduce(
-      (acc, q) => acc + (q.marks || 1),
-      0,
-    );
+    const examDoc = await Exam.findById(exam);
 
-    const percentage =
-      totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
+    if (!examDoc) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
 
     const result = await Result.create({
       student,
       exam,
+      className: examDoc.className, // ✅ FIXED
+      subject: examDoc.subject, // ✅ FIXED
       answers: detailedResults,
       score,
       wrong,
       total: totalQuestions,
-      percentage,
+      percentage: Math.round((score / totalQuestions) * 100),
     });
 
     console.log("RESULT SAVED:", result._id);
@@ -100,7 +97,7 @@ const submitExam = asyncHandler(async (req, res) => {
       result,
       score,
       total: totalQuestions,
-      percentage,
+      percentage: result.percentage,
     });
   } catch (err) {
     console.log("SUBMIT ERROR:", err);
@@ -117,7 +114,7 @@ const submitExam = asyncHandler(async (req, res) => {
 const getResults = asyncHandler(async (req, res) => {
   const results = await Result.find()
     .populate("student", "name className admissionNo")
-    .populate("exam", "title subject");
+    .populate("exam", "title subject className"); // ✅ ADD className
 
   console.log("TOTAL RESULTS:", results.length);
 
@@ -141,8 +138,8 @@ const getLeaderboard = asyncHandler(async (req, res) => {
 const getStudentResults = asyncHandler(async (req, res) => {
   const results = await Result.find({ student: req.params.id }).populate(
     "exam",
-    "title subject",
-  );
+    "title subject className",
+  ); // ✅ ADD className
 
   res.json(results);
 });
