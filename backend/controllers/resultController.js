@@ -72,7 +72,7 @@ const submitExam = asyncHandler(async (req, res) => {
 
     const totalQuestions = examData.questions.length;
 
-    const examDoc = await Exam.findById(exam);
+    const examDoc = examData;
 
     if (!examDoc) {
       return res.status(404).json({ message: "Exam not found" });
@@ -81,17 +81,19 @@ const submitExam = asyncHandler(async (req, res) => {
     const result = await Result.create({
       student,
       exam,
+
       examTitle: examDoc.title,
       className: examDoc.className,
       subject: examDoc.subject,
+
+      answers: detailedResults,
       score,
       wrong,
       total: totalQuestions,
       percentage: Math.round((score / totalQuestions) * 100),
     });
-  
+
     console.log("RESULT SAVED:", result._id);
-    x;
 
     return res.status(201).json({
       message: "Submitted successfully",

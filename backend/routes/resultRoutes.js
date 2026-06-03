@@ -14,12 +14,10 @@ const {
 
 const auth = require("../middleware/authMiddleware");
 
-
 // ==============================
 // SUBMIT EXAM
 // ==============================
 router.post("/submit", auth, submitExam);
-
 
 // ==============================
 // GET ALL RESULTS (ADMIN DASHBOARD)
@@ -37,14 +35,15 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-
 // ==============================
 // STUDENT RESULTS
 // ==============================
 router.get("/student/:id", auth, async (req, res) => {
   try {
-    const results = await Result.find({ student: req.params.id })
-      .populate("exam", "title subject className");
+    const results = await Result.find({ student: req.params.id }).populate(
+      "exam",
+      "title subject className",
+    );
 
     res.json(results);
   } catch (err) {
@@ -52,7 +51,6 @@ router.get("/student/:id", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // ==============================
 // CLASS FILTER RESULTS
@@ -64,7 +62,7 @@ router.get("/class/:className", auth, async (req, res) => {
       .populate("exam", "title subject className");
 
     const filtered = results.filter(
-      (r) => r.exam?.className === req.params.className
+      (r) => r.exam?.className === req.params.className,
     );
 
     res.json(filtered);
@@ -73,7 +71,6 @@ router.get("/class/:className", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // ==============================
 // LEADERBOARD (TOP 10 STUDENTS)
@@ -92,7 +89,6 @@ router.get("/leaderboard", auth, async (req, res) => {
   }
 });
 
-
 // ==============================
 // LEADERBOARD BY EXAM (OPTIONAL)
 // ==============================
@@ -110,7 +106,6 @@ router.get("/leaderboard/:examId", auth, async (req, res) => {
   }
 });
 
-
 // ==============================
 // ANALYTICS (SUBJECT PERFORMANCE)
 // ==============================
@@ -121,7 +116,7 @@ router.get("/analytics/subjects", auth, async (req, res) => {
     const summary = {};
 
     results.forEach((r) => {
-      const subject = r.exam?.subject || "Unknown";
+      const subject = r.subject || r.exam?.subject || "Unknown";
 
       if (!summary[subject]) {
         summary[subject] = {
@@ -145,7 +140,6 @@ router.get("/analytics/subjects", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // ==============================
 // EXPORT ROUTER
