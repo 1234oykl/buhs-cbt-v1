@@ -1,21 +1,16 @@
 const asyncHandler = require("express-async-handler");
 const Exam = require("../models/examModel");
 
-// CREATE EXAM
 const createExam = asyncHandler(async (req, res) => {
-  const { title, className, subject, duration, questions } = req.body;
+  console.log("REQ BODY:", req.body);
+  console.log("EXAM CODE:", examCode);
+  const { title, className, subject, duration, date, questions } = req.body;
 
-  if (!title || !className || !subject || !duration) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
+  const examCode = `${className}-${subject}-${title}-${date}`;
 
-  if (!Array.isArray(questions) || questions.length === 0) {
-    return res.status(400).json({ message: "Questions are required" });
-  }
+  const existingExam = await Exam.findOne({ examCode });
 
-  const existing = await Exam.findOne({ title });
-
-  if (existing) {
+  if (existingExam) {
     return res.status(400).json({ message: "Exam already exists" });
   }
 
@@ -24,10 +19,15 @@ const createExam = asyncHandler(async (req, res) => {
     className,
     subject,
     duration,
+    date,
     questions,
+    examCode,
   });
 
-  return res.status(201).json(exam);
+  res.status(201).json({
+    message: "Exam created successfully",
+    exam,
+  });
 });
 
 // GET ALL EXAMS

@@ -59,6 +59,9 @@ function StudentDashboard() {
         );
 
         setExams(examsRes.data || []);
+        console.log("EXAMS:", examsRes.data);
+        console.log("STUDENT:", user);
+
         setResults(resultsRes.data || []);
 
         setLoading(false);

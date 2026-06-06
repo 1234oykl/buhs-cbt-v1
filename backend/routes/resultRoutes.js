@@ -141,6 +141,22 @@ router.get("/analytics/subjects", auth, async (req, res) => {
   }
 });
 
+router.get("/class-sheet/:className", auth, async (req, res) => {
+  try {
+    const results = await Result.find()
+      .populate("student", "name className admissionNo")
+      .populate("exam", "title subject className");
+
+    const filtered = results.filter(
+      (r) => r.student?.className === req.params.className
+    );
+
+    res.json(filtered);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ==============================
 // EXPORT ROUTER
 // ==============================

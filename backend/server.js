@@ -26,11 +26,6 @@ const PORT = process.env.PORT || 5000;
 // CONNECT DB
 connectDB();
 
-// DB connection log
-mongoose.connection.once("open", () => {
-  console.log("CONNECTED DB:", mongoose.connection.name);
-});
-
 const app = express();
 
 // MIDDLEWARE
@@ -65,6 +60,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/subjects", subjectRoutes);
+
 
 app.get("/test-result-save", async (req, res) => {
   const Result = require("./models/resultModel");

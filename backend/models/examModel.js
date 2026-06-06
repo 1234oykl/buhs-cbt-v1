@@ -6,11 +6,15 @@ const examSchema = new mongoose.Schema(
 
     className: { type: String, required: true, index: true },
 
-    // ✅ ADD SUBJECT
     subject: { type: String, required: true },
 
     duration: { type: Number, required: true },
-    
+
+    date: {
+      type: Date,
+      required: true,
+    },
+
     examCode: {
       type: String,
       unique: true,
@@ -20,11 +24,14 @@ const examSchema = new mongoose.Schema(
       {
         question: { type: String, required: true },
         options: { type: [String], required: true },
-
-        // admin only
         correctAnswer: { type: String, required: true },
       },
     ],
+
+    examKey: {
+      type: String,
+      unique: true,
+    },
 
     isActive: {
       type: Boolean,

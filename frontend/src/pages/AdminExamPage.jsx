@@ -34,11 +34,7 @@ function AdminExamPage() {
   // =========================
   // HANDLE OPTION CHANGE
   // =========================
-  const handleOptionChange = (
-    qIndex,
-    optIndex,
-    value
-  ) => {
+  const handleOptionChange = (qIndex, optIndex, value) => {
     const updated = [...questions];
 
     updated[qIndex].options[optIndex] = value;
@@ -49,10 +45,7 @@ function AdminExamPage() {
   // =========================
   // HANDLE CORRECT ANSWER
   // =========================
-  const handleCorrectAnswer = (
-    qIndex,
-    value
-  ) => {
+  const handleCorrectAnswer = (qIndex, value) => {
     const updated = [...questions];
 
     updated[qIndex].correctAnswer = value;
@@ -80,9 +73,7 @@ function AdminExamPage() {
   const removeQuestion = (index) => {
     if (questions.length === 1) return;
 
-    const updated = questions.filter(
-      (_, i) => i !== index
-    );
+    const updated = questions.filter((_, i) => i !== index);
 
     setQuestions(updated);
   };
@@ -94,55 +85,34 @@ function AdminExamPage() {
     e.preventDefault();
 
     // BASIC VALIDATION
-    if (
-      !title ||
-      !className ||
-      !subject ||
-      !duration ||
-      !examDate
-    ) {
+    if (!title || !className || !subject || !duration || !examDate) {
       alert("Please fill all exam details.");
       return;
     }
 
     // QUESTIONS VALIDATION
     for (let q of questions) {
-
       if (!q.question.trim()) {
-        alert(
-          "Every question must have a question."
-        );
+        alert("Every question must have a question.");
         return;
       }
 
-      if (
-        q.options.some(
-          (opt) => opt.trim() === ""
-        )
-      ) {
+      if (q.options.some((opt) => opt.trim() === "")) {
         alert("All options must be filled.");
         return;
       }
 
       if (!q.correctAnswer) {
-        alert(
-          "Please select the correct answer."
-        );
+        alert("Please select the correct answer.");
         return;
       }
     }
 
     try {
-      const user = JSON.parse(
-        localStorage.getItem("user")
-      );
+      const user = JSON.parse(localStorage.getItem("user"));
 
       // CHECK ADMIN LOGIN
-      if (
-        !user ||
-        !user.token ||
-        !user.isAdmin
-      ) {
+      if (!user || !user.token || !user.isAdmin) {
         alert("Admin login required");
 
         navigate("/admin-login");
@@ -152,211 +122,146 @@ function AdminExamPage() {
 
       const examData = {
         title: title.trim(),
-        className: className
-          .trim()
-          .toUpperCase(),
+        className: className.trim().toUpperCase(),
         subject: subject.trim(),
         duration: Number(duration),
         date: examDate,
         questions,
       };
 
-      console.log(
-        "SENDING EXAM:",
-        examData
-      );
+      console.log("SENDING EXAM:", examData);
 
-      await api.post(
-        "/exams",
-        examData,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
+      await api.post("/exams", examData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
 
       alert("Exam created successfully!");
-
+      window.localStorage.setItem("examCreated", "true");
       navigate("/admin");
-
     } catch (err) {
+      console.log("FULL ERROR:", err.response?.data || err.message);
 
-      console.log(
-        "FULL ERROR:",
-        err.response?.data ||
-          err.message
-      );
-
-      alert(
-        err.response?.data?.message ||
-          "Failed to create exam"
-      );
+      alert(err.response?.data?.message || "Failed to create exam");
     }
   };
 
   return (
     <div className="admin-add-exam">
-
       <h2>Create New Exam</h2>
 
-      <form
-        onSubmit={handleSubmit}
-        className="exam-form"
-      >
-
+      <form onSubmit={handleSubmit} className="exam-form">
         {/* EXAM TITLE */}
         <div className="form-group">
-
           <label>Exam Title</label>
 
           <input
             type="text"
             value={title}
             placeholder="Enter exam title"
-            onChange={(e) =>
-              setTitle(e.target.value)
-            }
+            onChange={(e) => setTitle(e.target.value)}
           />
-
         </div>
 
         {/* CLASS */}
         <div className="form-group">
-
           <label>Class</label>
 
-          <input
-            type="text"
+          <select
             value={className}
-            placeholder="Enter class name (e.g SS1)"
-            onChange={(e) =>
-              setClassName(e.target.value)
-            }
-          />
+            onChange={(e) => setClassName(e.target.value)}
+          >
+            <option value="">Select Class</option>
 
+            <option value="JS1">JS1</option>
+            <option value="JS2">JS2</option>
+            <option value="JS3">JS3</option>
+
+            <option value="SS1">SS1</option>
+            <option value="SS2">SS2</option>
+            <option value="SS3">SS3</option>
+          </select>
         </div>
 
         {/* SUBJECT */}
         <div className="form-group">
-
           <label>Subject</label>
 
           <input
             type="text"
             value={subject}
             placeholder="Enter subject"
-            onChange={(e) =>
-              setSubject(e.target.value)
-            }
+            onChange={(e) => setSubject(e.target.value)}
           />
-
         </div>
 
         {/* DURATION */}
         <div className="form-group">
-
-          <label>
-            Duration (minutes)
-          </label>
+          <label>Duration (minutes)</label>
 
           <input
             type="number"
             value={duration}
             placeholder="Enter duration"
-            onChange={(e) =>
-              setDuration(e.target.value)
-            }
+            onChange={(e) => setDuration(e.target.value)}
           />
-
         </div>
 
         {/* EXAM DATE */}
         <div className="form-group">
-
           <label>Exam Date</label>
 
           <input
             type="date"
             value={examDate}
-            onChange={(e) =>
-              setExamDate(e.target.value)
-            }
+            onChange={(e) => setExamDate(e.target.value)}
           />
-
         </div>
 
         <hr />
 
-        <h3 style={{ color: "white" }}>
-          Questions
-        </h3>
+        <h3 style={{ color: "white" }}>Questions</h3>
 
         {questions.map((q, index) => (
-          <div
-            key={index}
-            className="question-box"
-          >
-
+          <div key={index} className="question-box">
             {/* QUESTION HEADER */}
             <div className="question-header">
-
-              <h4 style={{ color: "white" }}>
-                Question {index + 1}
-              </h4>
+              <h4 style={{ color: "white" }}>Question {index + 1}</h4>
 
               <button
                 type="button"
                 className="remove-btn"
-                onClick={() =>
-                  removeQuestion(index)
-                }
+                onClick={() => removeQuestion(index)}
               >
                 Remove
               </button>
-
             </div>
 
             {/* QUESTION */}
             <textarea
               value={q.question}
               placeholder="Enter question..."
-              onChange={(e) =>
-                handleQuestionChange(
-                  index,
-                  e.target.value
-                )
-              }
+              onChange={(e) => handleQuestionChange(index, e.target.value)}
             />
 
             {/* OPTIONS */}
             <div className="options-grid">
-
-              {q.options.map(
-                (opt, optIndex) => (
-                  <input
-                    key={optIndex}
-                    type="text"
-                    value={opt}
-                    placeholder={`Option ${
-                      optIndex + 1
-                    }`}
-                    onChange={(e) =>
-                      handleOptionChange(
-                        index,
-                        optIndex,
-                        e.target.value
-                      )
-                    }
-                  />
-                )
-              )}
-
+              {q.options.map((opt, optIndex) => (
+                <input
+                  key={optIndex}
+                  type="text"
+                  value={opt}
+                  placeholder={`Option ${optIndex + 1}`}
+                  onChange={(e) =>
+                    handleOptionChange(index, optIndex, e.target.value)
+                  }
+                />
+              ))}
             </div>
 
             {/* CORRECT ANSWER */}
             <div className="correct-answer">
-
               <label
                 style={{
                   color: "white",
@@ -368,52 +273,33 @@ function AdminExamPage() {
 
               <select
                 value={q.correctAnswer}
-                onChange={(e) =>
-                  handleCorrectAnswer(
-                    index,
-                    e.target.value
-                  )
-                }
+                onChange={(e) => handleCorrectAnswer(index, e.target.value)}
               >
-
-                <option value="">
-                  -- Select Correct Option --
-                </option>
+                <option value="">-- Select Correct Option --</option>
 
                 {q.options.map((opt, i) => (
-                  <option
-                    key={i}
-                    value={opt}
-                  >
-                    {opt ||
-                      `Option ${i + 1}`}
+                  <option key={i} value={opt}>
+                    {opt || `Option ${i + 1}`}
                   </option>
                 ))}
-
               </select>
-
             </div>
-
           </div>
         ))}
 
         {/* ADD QUESTION BUTTON */}
-        <button
-          type="button"
-          className="add-btn"
-          onClick={addQuestion}
-        >
+        <button type="button" className="add-btn" onClick={addQuestion}>
           + Add Another Question
         </button>
 
         {/* SUBMIT BUTTON */}
         <button
           type="submit"
-          className="submit-btn" style={{padding: "12px", background: "blue" }}
+          className="submit-btn"
+          style={{ padding: "12px", background: "blue" }}
         >
           Create Exam
         </button>
-
       </form>
     </div>
   );
