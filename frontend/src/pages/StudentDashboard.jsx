@@ -101,10 +101,8 @@ function StudentDashboard() {
     const classMatch =
       e.className &&
       student?.className &&
-      student.className
-        .trim()
-        .toUpperCase()
-        .startsWith(e.className.trim().toUpperCase());
+      student.className.trim().toUpperCase() ===
+        e.className.trim().toUpperCase();
 
     return searchMatch && classMatch;
   });

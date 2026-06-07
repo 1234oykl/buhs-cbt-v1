@@ -14,7 +14,7 @@ const {
 
 
 // ========================
-// HEALTH CHECK (VERY IMPORTANT)
+// HEALTH CHECK
 // ========================
 router.get("/health", (req, res) => {
   res.status(200).json({ message: "Exam routes working" });
@@ -22,63 +22,33 @@ router.get("/health", (req, res) => {
 
 
 // ========================
-// GET ALL EXAMS (STUDENT DASHBOARD)
+// GET ALL EXAMS
 // ========================
-router.get("/", auth, (req, res, next) => {
-  try {
-    return getExams(req, res, next);
-  } catch (err) {
-    console.error("GET EXAMS ERROR:", err);
-    return res.status(500).json({ message: "Failed to load exams" });
-  }
-});
+router.get("/", auth, getExams);
 
 
 // ========================
 // GET EXAMS BY CLASS
 // ========================
-router.get("/class/:className", auth, (req, res, next) => {
-  try {
-    return getExamsByClass(req, res, next);
-  } catch (err) {
-    return res.status(500).json({ message: "Failed to load class exams" });
-  }
-});
+router.get("/class/:className", auth, getExamsByClass);
 
 
 // ========================
 // GET SINGLE EXAM
 // ========================
-router.get("/:id", auth, (req, res, next) => {
-  try {
-    return getExamById(req, res, next);
-  } catch (err) {
-    return res.status(500).json({ message: "Exam not found" });
-  }
-});
+router.get("/:id", auth, getExamById);
 
 
 // ========================
 // START EXAM
 // ========================
-router.post("/start", auth, (req, res, next) => {
-  try {
-    return startExam(req, res, next);
-  } catch (err) {
-    return res.status(500).json({ message: "Failed to start exam" });
-  }
-});
+router.post("/start", auth, startExam);
 
 
 // ========================
 // CREATE EXAM (ADMIN ONLY)
 // ========================
-router.post("/", auth, adminOnly, (req, res, next) => {
-  try {
-    return createExam(req, res, next);
-  } catch (err) {
-    return res.status(500).json({ message: "Failed to create exam" });
-  }
-});
+router.post("/", auth, adminOnly, createExam);
+
 
 module.exports = router;

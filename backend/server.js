@@ -10,8 +10,6 @@ const mongoose = require("mongoose");
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
-
-
 const resultRoutes = require("./routes/resultRoutes");
 console.log("🔥🔥🔥 RESULT ROUTES LOADED V2 🔥🔥🔥");
 const examRoutes = require("./routes/examRoutes");
@@ -24,9 +22,22 @@ const { errorHandler } = require("./middleware/errorMiddleware");
 const PORT = process.env.PORT || 5000;
 
 // CONNECT DB
-connectDB();
-
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`.cyan.underline);
+    });
+  })
+  .catch((err) => {
+    console.error("DB CONNECTION FAILED:", err);
+  });
 const app = express();
+
+
+mongoose.connection.on("connected", () => {
+  console.log("🔥 MONGO CONNECTED:", mongoose.connection.name);
+});
+
 
 // MIDDLEWARE
 app.use(express.json());
@@ -38,12 +49,12 @@ app.use(express.urlencoded({ extended: false }));
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://buhs-cbt-v1.vercel.app" // 👈 CHANGE THIS TO YOUR REAL VERCEL URL
+  "https://buhs-cbt-v1.vercel.app", // 👈 CHANGE THIS TO YOUR REAL VERCEL URL
 ];
 
 app.use(
   cors({
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -52,7 +63,7 @@ app.use(
 // ROUTES
 app.get("/", (req, res) => {
   res.status(200).json({
-    message: "Welcome to BUHS CBT API"
+    message: "Welcome to BUHS CBT API",
   });
 });
 
@@ -60,7 +71,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/subjects", subjectRoutes);
-
 
 app.get("/test-result-save", async (req, res) => {
   const Result = require("./models/resultModel");
@@ -71,14 +81,13 @@ app.get("/test-result-save", async (req, res) => {
       exam: "665000000000000000000000",
       score: 5,
       total: 10,
-      answers: []
+      answers: [],
     });
 
     res.json({
       message: "SAVE WORKS",
-      data: test
+      data: test,
     });
-
   } catch (err) {
     console.log("TEST SAVE ERROR:", err);
     res.status(500).json({ error: err.message });
@@ -87,29 +96,24 @@ app.get("/test-result-save", async (req, res) => {
 
 app.get("/api/test-server", (req, res) => {
   res.json({
-    message: "NEW SERVER FILE IS RUNNING"
+    message: "NEW SERVER FILE IS RUNNING",
   });
 });
-
 
 app.post("/debug-submit", (req, res) => {
   console.log("🔥 DEBUG ROUTE HIT");
   res.json({ ok: true });
 });
 
-
 app.post("/api/test-hit", (req, res) => {
   console.log("🔥 HIT CONFIRMED");
   res.json({ ok: true });
 });
-
 
 // ERROR HANDLER (LAST)
 app.use(errorHandler);
 
 // START SERVER
 app.listen(PORT, () => {
-  console.log(
-    `Server is running on port ${PORT}`.cyan.underline
-  );
+  console.log(`Server is running on port ${PORT}`.cyan.underline);
 });

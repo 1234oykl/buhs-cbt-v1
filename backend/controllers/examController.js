@@ -2,11 +2,16 @@ const asyncHandler = require("express-async-handler");
 const Exam = require("../models/examModel");
 
 const createExam = asyncHandler(async (req, res) => {
-  console.log("REQ BODY:", req.body);
-  console.log("EXAM CODE:", examCode);
+  console.log("🔥🔥 NEW CREATE EXAM FILE LOADED");
+  console.log("🔥 CREATE EXAM CONTROLLER HIT");
+
   const { title, className, subject, duration, date, questions } = req.body;
 
-  const examCode = `${className}-${subject}-${title}-${date}`;
+  console.log("REQ BODY:", req.body);
+
+  const examCode = `${className}-${subject}-${new Date(date).toISOString().split("T")[0]}`;
+
+  console.log("EXAM CODE:", examCode);
 
   const existingExam = await Exam.findOne({ examCode });
 
@@ -14,6 +19,7 @@ const createExam = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Exam already exists" });
   }
 
+  // ✅ THIS IS WHAT YOU WERE MISSING
   const exam = await Exam.create({
     title,
     className,
@@ -24,7 +30,9 @@ const createExam = asyncHandler(async (req, res) => {
     examCode,
   });
 
-  res.status(201).json({
+  console.log("🔥 SAVED EXAM:", exam);
+
+  return res.status(201).json({
     message: "Exam created successfully",
     exam,
   });
@@ -33,6 +41,7 @@ const createExam = asyncHandler(async (req, res) => {
 // GET ALL EXAMS
 const getExams = asyncHandler(async (req, res) => {
   const exams = await Exam.find();
+  console.log("🔥 ALL EXAMS:", exams);
   return res.status(200).json(exams);
 });
 
@@ -40,6 +49,7 @@ const getExams = asyncHandler(async (req, res) => {
 const getExamsByClass = asyncHandler(async (req, res) => {
   const exams = await Exam.find({
     className: req.params.className,
+    isActive: true,
   });
 
   return res.status(200).json(exams);
@@ -54,6 +64,17 @@ const getExamById = asyncHandler(async (req, res) => {
   }
 
   return res.status(200).json(exam);
+});
+
+const getExamsForStudent = asyncHandler(async (req, res) => {
+  const { classLevel } = req.params;
+
+  const exams = await Exam.find({
+    className: classLevel,
+    isActive: true,
+  });
+
+  res.status(200).json(exams);
 });
 
 // START EXAM
@@ -90,5 +111,6 @@ module.exports = {
   getExams,
   getExamById,
   getExamsByClass,
+  getExamsForStudent, // ✅ MISSING
   startExam,
 };
