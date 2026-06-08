@@ -90,6 +90,8 @@ function StudentDashboard() {
     return results.some((r) => r.exam?._id === examId || r.exam === examId);
   };
 
+  const studentBaseClass = student?.className?.replace(/[A-Z]$/, "");
+
   // =========================
   // FILTER EXAMS
   // =========================
@@ -98,14 +100,13 @@ function StudentDashboard() {
       (e.title || "").toLowerCase().includes(search.toLowerCase()) ||
       (e.subject || "").toLowerCase().includes(search.toLowerCase());
 
-    const classMatch =
-      e.className &&
-      student?.className &&
-      student.className.trim().toUpperCase() ===
-        e.className.trim().toUpperCase();
+    const studentBaseClass = student?.className?.replace(/[A-Z]$/, "");
+
+    const classMatch = e.className && studentBaseClass === e.className;
 
     return searchMatch && classMatch;
   });
+
 
   // =========================
   // OPEN EXAM MODAL

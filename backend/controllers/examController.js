@@ -21,14 +21,14 @@ const createExam = asyncHandler(async (req, res) => {
 
   // ✅ THIS IS WHAT YOU WERE MISSING
   const exam = await Exam.create({
-    title,
-    className,
-    subject,
-    duration,
-    date,
-    questions,
-    examCode,
-  });
+  title,
+  className,
+  subject,
+  duration,
+  date,
+  questions,
+  examCode,
+});
 
   console.log("🔥 SAVED EXAM:", exam);
 
